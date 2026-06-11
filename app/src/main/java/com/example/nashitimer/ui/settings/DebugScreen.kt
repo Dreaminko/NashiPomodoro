@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
 fun DebugScreen(
@@ -50,14 +54,13 @@ fun DebugScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
-                    Text("<", style = MaterialTheme.typography.headlineMedium)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Back"
+                    )
                 }
                 Column(Modifier.padding(start = 8.dp)) {
-                    Text("Debug", style = MaterialTheme.typography.headlineMedium)
-                    Text(
-                        "Device diagnostics and testing controls",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    PageTitle("Debug")
                 }
             }
         }

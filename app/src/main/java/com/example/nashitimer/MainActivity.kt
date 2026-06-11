@@ -28,7 +28,10 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
                 ThemeMode.FOLLOW_SYSTEM -> systemDark
             }
-            NashiTimerTheme(darkTheme = darkTheme) {
+            NashiTimerTheme(
+                darkTheme = darkTheme,
+                dynamicColor = true
+            ) {
                 AppNavigation()
             }
         }

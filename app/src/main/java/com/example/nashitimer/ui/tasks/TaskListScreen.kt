@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
 fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
@@ -38,7 +39,7 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Column {
-            Text("Tasks", style = MaterialTheme.typography.headlineMedium)
+            PageTitle("Tasks")
             Text(
                 "${tasks.count { !it.isCompleted }} open | ${tasks.count { it.isCompleted }} completed",
                 color = MaterialTheme.colorScheme.onSurfaceVariant

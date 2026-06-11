@@ -17,6 +17,7 @@ class TimerEngine @Inject constructor() {
     private val _state = MutableStateFlow(TimerState())
     val state: StateFlow<TimerState> = _state.asStateFlow()
     private var ticker: Job? = null
+    private var pausedPhase = TimerPhase.FOCUS
 
     fun start(scope: CoroutineScope, settings: AppSettings, phase: TimerPhase = TimerPhase.FOCUS) {
         val duration = durationFor(phase, settings)
@@ -40,13 +41,43 @@ class TimerEngine @Inject constructor() {
 
     fun pause() {
         ticker?.cancel()
+        pausedPhase = _state.value.phase
         _state.value = _state.value.copy(isRunning = false, phase = TimerPhase.PAUSED)
     }
 
     fun stop(settings: AppSettings) {
         ticker?.cancel()
+        pausedPhase = TimerPhase.FOCUS
         val duration = durationFor(TimerPhase.FOCUS, settings)
         _state.value = TimerState(remainingMs = duration, totalMs = duration)
+    }
+
+    fun skip(scope: CoroutineScope, settings: AppSettings) {
+        val current = _state.value
+        if (current.phase == TimerPhase.IDLE) return
+
+        ticker?.cancel()
+        val currentPhase = if (current.phase == TimerPhase.PAUSED) pausedPhase else current.phase
+        val nextPhase = when (currentPhase) {
+            TimerPhase.FOCUS -> {
+                val nextRound = current.completedFocusRounds + 1
+                if (nextRound % settings.longBreakInterval == 0) {
+                    TimerPhase.LONG_BREAK
+                } else {
+                    TimerPhase.SHORT_BREAK
+                }
+            }
+            TimerPhase.SHORT_BREAK, TimerPhase.LONG_BREAK -> TimerPhase.FOCUS
+            TimerPhase.IDLE, TimerPhase.PAUSED -> TimerPhase.FOCUS
+        }
+        val duration = durationFor(nextPhase, settings)
+        _state.value = current.copy(
+            phase = nextPhase,
+            remainingMs = duration,
+            totalMs = duration,
+            isRunning = current.isRunning
+        )
+        if (current.isRunning) runTicker(scope, settings)
     }
 
     fun setFaceDown(faceDown: Boolean) {
@@ -85,7 +116,7 @@ class TimerEngine @Inject constructor() {
     }
 
     private fun activePhase(): TimerPhase = when (_state.value.phase) {
-        TimerPhase.PAUSED -> TimerPhase.FOCUS
+        TimerPhase.PAUSED -> pausedPhase
         TimerPhase.IDLE -> TimerPhase.FOCUS
         else -> _state.value.phase
     }

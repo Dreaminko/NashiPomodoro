@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -24,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nashitimer.domain.model.ThemeMode
+import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
 fun SettingsScreen(
@@ -41,14 +46,13 @@ fun SettingsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
-                    Text("<", style = MaterialTheme.typography.headlineMedium)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Back"
+                    )
                 }
                 Column(Modifier.padding(start = 8.dp)) {
-                    Text("Settings", style = MaterialTheme.typography.headlineMedium)
-                    Text(
-                        "Shape a focus rhythm that fits your day",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    PageTitle("Settings")
                 }
             }
         }
@@ -140,7 +144,11 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Text(">", style = MaterialTheme.typography.titleLarge)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = "Open debug settings",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

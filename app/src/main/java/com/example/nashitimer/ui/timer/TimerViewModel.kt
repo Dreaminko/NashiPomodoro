@@ -74,6 +74,10 @@ class TimerViewModel @Inject constructor(
         context.stopService(Intent(context, PomodoroService::class.java))
     }
 
+    fun skip() {
+        engine.skip(viewModelScope, settings.value)
+    }
+
     private fun observeFlips() {
         viewModelScope.launch {
             flipDetector.faceDownEvents().distinctUntilChanged().collect { faceDown ->
