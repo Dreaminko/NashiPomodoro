@@ -13,6 +13,9 @@ data class TimerState(
     val progress: Float
         get() = if (totalMs <= 0) 0f else 1f - (remainingMs.toFloat() / totalMs.toFloat())
 
+    val remainingFraction: Float
+        get() = if (totalMs <= 0) 0f else (remainingMs.toFloat() / totalMs.toFloat()).coerceIn(0f, 1f)
+
     val timeText: String
         get() {
             val totalSeconds = (remainingMs / 1000).coerceAtLeast(0)

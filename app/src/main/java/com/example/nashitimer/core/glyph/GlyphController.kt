@@ -5,15 +5,25 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.nothing.ketchum.Common
-import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
 import com.nothing.ketchum.GlyphManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
+
+data class GlyphDebugState(
+    val serviceConnected: Boolean = false,
+    val registered: Boolean = false,
+    val sessionOpen: Boolean = false,
+    val registrationTarget: String? = null,
+    val lastEffect: String? = null,
+    val lastError: String? = null
+)
 
 @Singleton
 class GlyphController @Inject constructor(
@@ -25,20 +35,35 @@ class GlyphController @Inject constructor(
     private var sessionOpen = false
     private var pendingEffect: GlyphEffect? = null
     private var lastEffectKey: String? = null
+    private val _debugState = MutableStateFlow(GlyphDebugState())
+    val debugState: StateFlow<GlyphDebugState> = _debugState.asStateFlow()
 
     private val callback = object : GlyphManager.Callback {
         override fun onServiceConnected(componentName: ComponentName) {
             val glyphManager = manager ?: return
+            _debugState.value = _debugState.value.copy(serviceConnected = true, lastError = null)
             runCatching {
-                val device = currentDevice()
-                val registered = if (device == null) glyphManager.register() else glyphManager.register(device)
-                if (!registered) {
-                    Log.e(TAG, "Glyph registration rejected for device=${device ?: "auto"}")
+                val registrationTargets = adapter.registrationTargets
+                val registeredDevice = registrationTargets.firstOrNull { device ->
+                    _debugState.value = _debugState.value.copy(registrationTarget = device)
+                    glyphManager.register(device)
+                }
+                val registered = registeredDevice != null
+                _debugState.value = _debugState.value.copy(
+                    registered = registered,
+                    registrationTarget = registeredDevice ?: registrationTargets.lastOrNull()
+                )
+                if (registeredDevice == null) {
+                    recordError("Glyph registration rejected for targets=$registrationTargets")
                     return
                 }
                 glyphManager.openSession()
                 sessionOpen = true
-                Log.i(TAG, "Glyph session opened for device=${device ?: "auto"}")
+                _debugState.value = _debugState.value.copy(sessionOpen = true)
+                Log.i(
+                    TAG,
+                    "Glyph session opened for device=$registeredDevice, profile=${adapter.profile}"
+                )
                 pendingEffect?.also {
                     pendingEffect = null
                     applyEffect(it, force = true)
@@ -48,13 +73,21 @@ class GlyphController @Inject constructor(
 
         override fun onServiceDisconnected(componentName: ComponentName) {
             sessionOpen = false
+            _debugState.value = _debugState.value.copy(
+                serviceConnected = false,
+                registered = false,
+                sessionOpen = false
+            )
             Log.w(TAG, "Glyph service disconnected: $componentName")
         }
     }
 
     fun init() {
-        if (!adapter.isNothingDevice) {
-            Log.i(TAG, "Glyph disabled on ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
+        if (!adapter.supportsGlyphBar) {
+            Log.i(
+                TAG,
+                "Glyph bar disabled for model=${android.os.Build.MODEL}, profile=${adapter.profile}"
+            )
             return
         }
         if (manager != null) return
@@ -66,7 +99,7 @@ class GlyphController @Inject constructor(
     }
 
     fun show(effect: GlyphEffect) {
-        if (!adapter.isNothingDevice) return
+        if (!adapter.supportsGlyphBar) return
         init()
         if (!sessionOpen) {
             pendingEffect = effect
@@ -81,6 +114,11 @@ class GlyphController @Inject constructor(
             if (sessionOpen) manager?.closeSession()
         }.onFailure { logFailure("closing Glyph session", it) }
         sessionOpen = false
+        _debugState.value = _debugState.value.copy(
+            serviceConnected = false,
+            registered = false,
+            sessionOpen = false
+        )
         runCatching { manager?.unInit() }
             .onFailure { logFailure("unbinding Glyph service", it) }
         manager = null
@@ -93,33 +131,36 @@ class GlyphController @Inject constructor(
         val key = effectKey(effect)
         if (!force && key == lastEffectKey) return
         lastEffectKey = key
+        _debugState.value = _debugState.value.copy(lastEffect = key, lastError = null)
 
         runCatching {
             when (effect) {
                 GlyphEffect.Off -> glyphManager.turnOff()
                 GlyphEffect.CompleteFlash -> flashAll(glyphManager)
-                is GlyphEffect.FocusProgress -> showFocus(glyphManager, effect.progress)
+                is GlyphEffect.FocusProgress -> showFocus(glyphManager, effect.remainingFraction)
                 GlyphEffect.ShortBreak -> animateBreak(glyphManager, 4_000)
                 GlyphEffect.LongBreak -> animateBreak(glyphManager, 6_000)
             }
         }.onFailure { logFailure("applying $effect", it) }
     }
 
-    private fun showFocus(glyphManager: GlyphManager, progress: Float) {
-        val frame = glyphManager.getGlyphFrameBuilder()
-            .buildChannelA()
-            .buildChannelB()
+    private fun showFocus(glyphManager: GlyphManager, remainingFraction: Float) {
+        val builder = glyphManager.getGlyphFrameBuilder()
             .buildPeriod(2_000)
             .buildCycles(1)
-            .build()
-        val percent = (progress.coerceIn(0f, 1f) * 100).roundToInt()
+        when (adapter.profile.progressChannel) {
+            GlyphProgressChannel.A -> builder.buildChannelA()
+            GlyphProgressChannel.C -> builder.buildChannelC()
+            GlyphProgressChannel.D -> builder.buildChannelD()
+            null -> return
+        }
+        val frame = builder.build()
+        val percent = (remainingFraction.coerceIn(0f, 1f) * 100).roundToInt()
         glyphManager.displayProgressAndToggle(frame, percent, false)
     }
 
     private fun animateBreak(glyphManager: GlyphManager, periodMs: Int) {
-        val frame = glyphManager.getGlyphFrameBuilder()
-            .buildChannelA()
-            .buildChannelB()
+        val frame = allChannelsBuilder(glyphManager)
             .buildPeriod(periodMs)
             .buildInterval(250)
             .buildCycles(1_000)
@@ -138,35 +179,33 @@ class GlyphController @Inject constructor(
     }
 
     private fun allChannelsFrame(glyphManager: GlyphManager): GlyphFrame =
+        allChannelsBuilder(glyphManager).build()
+
+    private fun allChannelsBuilder(glyphManager: GlyphManager): GlyphFrame.Builder =
         glyphManager.getGlyphFrameBuilder()
             .buildChannelA()
             .buildChannelB()
             .buildChannelC()
             .buildChannelD()
             .buildChannelE()
-            .build()
 
     private fun effectKey(effect: GlyphEffect): String = when (effect) {
-        is GlyphEffect.FocusProgress -> "focus:${(effect.progress.coerceIn(0f, 1f) * 100).roundToInt()}"
+        is GlyphEffect.FocusProgress ->
+            "focus:${(effect.remainingFraction.coerceIn(0f, 1f) * 100).roundToInt()}"
         GlyphEffect.ShortBreak -> "short-break"
         GlyphEffect.LongBreak -> "long-break"
         GlyphEffect.CompleteFlash -> "complete:${System.nanoTime()}"
         GlyphEffect.Off -> "off"
     }
 
-    private fun currentDevice(): String? = when {
-        Common.is20111() -> Glyph.DEVICE_20111
-        Common.is22111() -> Glyph.DEVICE_22111
-        Common.is23111() -> Glyph.DEVICE_23111
-        Common.is23113() -> Glyph.DEVICE_23113
-        Common.is24111() -> Glyph.DEVICE_24111
-        Common.is25111() -> Glyph.DEVICE_25111
-        else -> null
-    }
-
     private fun logFailure(action: String, error: Throwable) {
         val cause = if (error is GlyphException) error else error.cause ?: error
-        Log.e(TAG, "Failed while $action: ${cause.message}", cause)
+        recordError("Failed while $action: ${cause.message}", cause)
+    }
+
+    private fun recordError(message: String, error: Throwable? = null) {
+        _debugState.value = _debugState.value.copy(lastError = message)
+        Log.e(TAG, message, error)
     }
 
     private companion object {

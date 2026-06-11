@@ -29,6 +29,9 @@ class SettingsViewModel @Inject constructor(
     fun setDailyGoal(value: Int) = update { copy(dailyGoal = value.coerceIn(1, 20)) }
     fun setTheme(value: ThemeMode) = update { copy(themeMode = value) }
     fun setVibration(value: Boolean) = update { copy(vibrationEnabled = value) }
+    fun setDebugMode(value: Boolean) = update { copy(debugModeEnabled = value) }
+    fun setDebugFocusDurationSeconds(value: Int) =
+        update { copy(debugFocusDurationSec = value.coerceIn(1, 3_600)) }
 
     private fun update(block: AppSettings.() -> AppSettings) {
         viewModelScope.launch { repository.update(block) }

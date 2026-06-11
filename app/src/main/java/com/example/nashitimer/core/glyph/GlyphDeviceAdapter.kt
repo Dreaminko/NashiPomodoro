@@ -6,13 +6,33 @@ import javax.inject.Singleton
 
 @Singleton
 class GlyphDeviceAdapter @Inject constructor() {
-    val isNothingDevice: Boolean
-        get() = Build.MANUFACTURER.equals("Nothing", ignoreCase = true) ||
-            Build.BRAND.equals("Nothing", ignoreCase = true)
+    val manufacturer: String
+        get() = Build.MANUFACTURER.orEmpty()
 
-    val progressChannelName: String
-        get() = when {
-            Build.MODEL.contains("A063", ignoreCase = true) -> "D1"
-            else -> "C1"
+    val brand: String
+        get() = Build.BRAND.orEmpty()
+
+    val model: String
+        get() = Build.MODEL.orEmpty()
+
+    val isNothingDevice: Boolean
+        get() = manufacturer.contains("Nothing", ignoreCase = true) ||
+            brand.contains("Nothing", ignoreCase = true) ||
+            profile != GlyphDeviceProfile.UNKNOWN
+
+    val profile: GlyphDeviceProfile
+        get() = GlyphDeviceProfile.fromModel(model)
+
+    val supportsGlyphBar: Boolean
+        get() = isNothingDevice && profile.supportsGlyphBar
+
+    val registrationTargets: List<String>
+        get() = if (!supportsGlyphBar) {
+            emptyList()
+        } else {
+            listOfNotNull(
+                model.trim().takeIf(String::isNotEmpty),
+                profile.sdkFamilyCode
+            ).distinct()
         }
 }

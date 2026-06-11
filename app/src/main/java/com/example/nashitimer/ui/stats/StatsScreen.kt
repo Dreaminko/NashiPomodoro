@@ -2,17 +2,18 @@ package com.example.nashitimer.ui.stats
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
@@ -29,28 +30,96 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
     val totalMinutes = sessions.sumOf { it.durationMs } / 60000
     val counts = (27 downTo 0).map { offset ->
         val day = today.minusDays(offset.toLong())
-        sessions.count { Instant.ofEpochMilli(it.createdAt).atZone(ZoneId.systemDefault()).toLocalDate() == day }
+        sessions.count {
+            Instant.ofEpochMilli(it.createdAt).atZone(ZoneId.systemDefault()).toLocalDate() == day
+        }
     }
 
-    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Text("Stats", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        StatCard("Today", "${todaySessions.size} pomodoros")
-        StatCard("Total focus", "$totalMinutes minutes")
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("28-day heatmap", style = MaterialTheme.typography.titleMedium)
-                HeatmapWidget(counts)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            horizontal = 24.dp,
+            vertical = 18.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        item {
+            Column {
+                Text("Insights", style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    "Small sessions add up to meaningful work",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        item {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard("Today", todaySessions.size.toString(), "sessions", Modifier.weight(1f))
+                StatCard("All time", totalMinutes.toString(), "minutes", Modifier.weight(1f))
+            }
+        }
+        item {
+            Surface(
+                Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large
+            ) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column {
+                        Text("Last 28 days", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            "Your focus activity at a glance",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    HeatmapWidget(counts, Modifier.fillMaxWidth())
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("4 weeks ago", style = MaterialTheme.typography.bodyMedium)
+                        Text("Today", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+        if (sessions.isEmpty()) {
+            item {
+                Surface(
+                    Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Your story starts here", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Complete a focus session and your activity will appear here.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatCard(title: String, value: String) {
-    Card(Modifier.fillMaxWidth()) {
+private fun StatCard(
+    title: String,
+    value: String,
+    suffix: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier,
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large
+    ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value, style = MaterialTheme.typography.headlineSmall)
+            Text(value, style = MaterialTheme.typography.headlineMedium)
+            Text(suffix, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

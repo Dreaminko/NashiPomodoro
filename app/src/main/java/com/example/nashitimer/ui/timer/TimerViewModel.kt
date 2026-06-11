@@ -92,12 +92,13 @@ class TimerViewModel @Inject constructor(
                 if (state.completedFocusRounds > lastRound.value) {
                     lastRound.value = state.completedFocusRounds
                     val now = System.currentTimeMillis()
+                    val focusDurationMs = settings.value.focusDurationMs
                     historyRepository.add(
                         PomodoroSession(
-                            startTime = now - settings.value.focusDurationMin * 60 * 1000L,
+                            startTime = now - focusDurationMs,
                             endTime = now,
                             phase = TimerPhase.FOCUS.name,
-                            durationMs = settings.value.focusDurationMin * 60 * 1000L,
+                            durationMs = focusDurationMs,
                             completed = true,
                             tag = "Focus",
                             createdAt = now
@@ -120,7 +121,8 @@ class TimerViewModel @Inject constructor(
                 }
                 when {
                     !state.isRunning -> glyphController.show(GlyphEffect.Off)
-                    state.phase == TimerPhase.FOCUS -> glyphController.show(GlyphEffect.FocusProgress(state.progress))
+                    state.phase == TimerPhase.FOCUS ->
+                        glyphController.show(GlyphEffect.FocusProgress(state.remainingFraction))
                     state.phase == TimerPhase.SHORT_BREAK -> glyphController.show(GlyphEffect.ShortBreak)
                     state.phase == TimerPhase.LONG_BREAK -> glyphController.show(GlyphEffect.LongBreak)
                 }

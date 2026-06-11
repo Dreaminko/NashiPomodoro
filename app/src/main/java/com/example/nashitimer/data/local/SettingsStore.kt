@@ -29,7 +29,9 @@ class SettingsStore @Inject constructor(
             dailyGoal = prefs[Keys.DAILY_GOAL] ?: 8,
             themeMode = prefs[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                 ?: ThemeMode.DARK,
-            vibrationEnabled = prefs[Keys.VIBRATION] ?: true
+            vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
+            debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
+            debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
         )
     }
 
@@ -43,7 +45,9 @@ class SettingsStore @Inject constructor(
                 dailyGoal = prefs[Keys.DAILY_GOAL] ?: 8,
                 themeMode = prefs[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                     ?: ThemeMode.DARK,
-                vibrationEnabled = prefs[Keys.VIBRATION] ?: true
+                vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
+                debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
+                debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
             ).transform()
             prefs[Keys.FOCUS_MIN] = next.focusDurationMin
             prefs[Keys.SHORT_BREAK_MIN] = next.shortBreakMin
@@ -52,6 +56,8 @@ class SettingsStore @Inject constructor(
             prefs[Keys.DAILY_GOAL] = next.dailyGoal
             prefs[Keys.THEME] = next.themeMode.name
             prefs[Keys.VIBRATION] = next.vibrationEnabled
+            prefs[Keys.DEBUG_MODE] = next.debugModeEnabled
+            prefs[Keys.DEBUG_FOCUS_SEC] = next.debugFocusDurationSec
         }
     }
 
@@ -63,5 +69,7 @@ class SettingsStore @Inject constructor(
         val DAILY_GOAL = intPreferencesKey("daily_goal")
         val THEME = stringPreferencesKey("theme")
         val VIBRATION = booleanPreferencesKey("vibration")
+        val DEBUG_MODE = booleanPreferencesKey("debug_mode")
+        val DEBUG_FOCUS_SEC = intPreferencesKey("debug_focus_sec")
     }
 }

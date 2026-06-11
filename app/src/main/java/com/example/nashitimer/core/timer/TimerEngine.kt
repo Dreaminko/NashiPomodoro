@@ -91,11 +91,10 @@ class TimerEngine @Inject constructor() {
     }
 
     private fun durationFor(phase: TimerPhase, settings: AppSettings): Long {
-        val minutes = when (phase) {
-            TimerPhase.FOCUS, TimerPhase.IDLE, TimerPhase.PAUSED -> settings.focusDurationMin
-            TimerPhase.SHORT_BREAK -> settings.shortBreakMin
-            TimerPhase.LONG_BREAK -> settings.longBreakMin
+        return when (phase) {
+            TimerPhase.FOCUS, TimerPhase.IDLE, TimerPhase.PAUSED -> settings.focusDurationMs
+            TimerPhase.SHORT_BREAK -> settings.shortBreakMin * 60_000L
+            TimerPhase.LONG_BREAK -> settings.longBreakMin * 60_000L
         }
-        return minutes * 60 * 1000L
     }
 }
