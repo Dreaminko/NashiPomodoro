@@ -121,6 +121,8 @@ class TimerViewModel @Inject constructor(
                 if (state.isRunning) {
                     val serviceIntent = Intent(context, PomodoroService::class.java)
                         .putExtra(PomodoroService.EXTRA_TIME, state.timeText)
+                        .putExtra(PomodoroService.EXTRA_REMAINING_MS, state.remainingMs)
+                        .putExtra(PomodoroService.EXTRA_TOTAL_MS, state.totalMs)
                     ContextCompat.startForegroundService(context, serviceIntent)
                 }
                 when {

@@ -19,7 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nashitimer.R
+import com.example.nashitimer.ui.components.NashiSwitch
 import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
@@ -49,148 +49,156 @@ fun DebugScreen(
         durationText = state.settings.debugFocusDurationSec.toString()
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.padding(
+                start = 24.dp,
+                top = 18.dp,
+                end = 24.dp,
+                bottom = 14.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = stringResource(R.string.action_back)
+                )
+            }
+            Column(Modifier.padding(start = 12.dp)) {
+                PageTitle(stringResource(R.string.debug_title))
+            }
+        }
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 40.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                DebugCard {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.debug_mode),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                stringResource(R.string.debug_mode_description),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        NashiSwitch(
+                            checked = state.settings.debugModeEnabled,
+                            onCheckedChange = viewModel::setDebugMode
+                        )
+                    }
+
+                    OutlinedTextField(
+                        value = durationText,
+                        onValueChange = { value ->
+                            durationText = value.filter(Char::isDigit).take(4)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.settings.debugModeEnabled,
+                        label = { Text(stringResource(R.string.debug_focus_duration)) },
+                        suffix = { Text(stringResource(R.string.unit_seconds)) },
+                        supportingText = { Text(stringResource(R.string.debug_duration_range)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+                    Button(
+                        onClick = {
+                            viewModel.setDebugFocusDurationSeconds(durationText.toIntOrNull() ?: 1)
+                        },
+                        enabled = state.settings.debugModeEnabled,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.action_apply_test_duration))
+                    }
+                }
+            }
+
+            item {
+                DebugCard {
+                    Text(
+                        stringResource(R.string.debug_glyph_test),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(onClick = viewModel::showFullGlyph, modifier = Modifier.weight(1f)) {
+                            Text("100%")
+                        }
+                        Button(onClick = viewModel::showHalfGlyph, modifier = Modifier.weight(1f)) {
+                            Text("50%")
+                        }
+                        Button(onClick = viewModel::turnOffGlyph, modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.action_off))
+                        }
+                    }
+                }
+            }
+
+            item {
+                DebugCard {
+                    Text(
+                        stringResource(R.string.debug_device),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    DebugValue(stringResource(R.string.debug_manufacturer), state.manufacturer)
+                    DebugValue(stringResource(R.string.debug_brand), state.brand)
+                    DebugValue(stringResource(R.string.debug_model), state.model)
+                    DebugValue(stringResource(R.string.debug_profile), state.profile)
+                    DebugValue(stringResource(R.string.debug_progress_channel), state.progressChannel)
+                    DebugValue(
+                        stringResource(R.string.debug_glyph_bar_supported),
+                        localizedBoolean(state.supportsGlyphBar)
                     )
                 }
-                Column(Modifier.padding(start = 12.dp)) {
-                    PageTitle(stringResource(R.string.debug_title))
-                }
             }
-        }
 
-        item {
-            DebugCard {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.debug_mode),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            stringResource(R.string.debug_mode_description),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = state.settings.debugModeEnabled,
-                        onCheckedChange = viewModel::setDebugMode
+            item {
+                DebugCard {
+                    Text(
+                        stringResource(R.string.debug_glyph_session),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_service_connected),
+                        localizedBoolean(state.glyph.serviceConnected)
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_registered),
+                        localizedBoolean(state.glyph.registered)
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_session_open),
+                        localizedBoolean(state.glyph.sessionOpen)
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_registration_target),
+                        state.glyph.registrationTarget
+                            ?: stringResource(R.string.value_not_available)
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_last_effect),
+                        state.glyph.lastEffect ?: stringResource(R.string.value_not_available)
+                    )
+                    DebugValue(
+                        stringResource(R.string.debug_last_error),
+                        state.glyph.lastError ?: stringResource(R.string.value_none)
                     )
                 }
-
-                OutlinedTextField(
-                    value = durationText,
-                    onValueChange = { value ->
-                        durationText = value.filter(Char::isDigit).take(4)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = state.settings.debugModeEnabled,
-                    label = { Text(stringResource(R.string.debug_focus_duration)) },
-                    suffix = { Text(stringResource(R.string.unit_seconds)) },
-                    supportingText = { Text(stringResource(R.string.debug_duration_range)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-                Button(
-                    onClick = {
-                        viewModel.setDebugFocusDurationSeconds(durationText.toIntOrNull() ?: 1)
-                    },
-                    enabled = state.settings.debugModeEnabled,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.action_apply_test_duration))
-                }
-            }
-        }
-
-        item {
-            DebugCard {
-                Text(
-                    stringResource(R.string.debug_glyph_test),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(onClick = viewModel::showFullGlyph, modifier = Modifier.weight(1f)) {
-                        Text("100%")
-                    }
-                    Button(onClick = viewModel::showHalfGlyph, modifier = Modifier.weight(1f)) {
-                        Text("50%")
-                    }
-                    Button(onClick = viewModel::turnOffGlyph, modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.action_off))
-                    }
-                }
-            }
-        }
-
-        item {
-            DebugCard {
-                Text(
-                    stringResource(R.string.debug_device),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                DebugValue(stringResource(R.string.debug_manufacturer), state.manufacturer)
-                DebugValue(stringResource(R.string.debug_brand), state.brand)
-                DebugValue(stringResource(R.string.debug_model), state.model)
-                DebugValue(stringResource(R.string.debug_profile), state.profile)
-                DebugValue(stringResource(R.string.debug_progress_channel), state.progressChannel)
-                DebugValue(
-                    stringResource(R.string.debug_glyph_bar_supported),
-                    localizedBoolean(state.supportsGlyphBar)
-                )
-            }
-        }
-
-        item {
-            DebugCard {
-                Text(
-                    stringResource(R.string.debug_glyph_session),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                DebugValue(
-                    stringResource(R.string.debug_service_connected),
-                    localizedBoolean(state.glyph.serviceConnected)
-                )
-                DebugValue(
-                    stringResource(R.string.debug_registered),
-                    localizedBoolean(state.glyph.registered)
-                )
-                DebugValue(
-                    stringResource(R.string.debug_session_open),
-                    localizedBoolean(state.glyph.sessionOpen)
-                )
-                DebugValue(
-                    stringResource(R.string.debug_registration_target),
-                    state.glyph.registrationTarget
-                        ?: stringResource(R.string.value_not_available)
-                )
-                DebugValue(
-                    stringResource(R.string.debug_last_effect),
-                    state.glyph.lastEffect ?: stringResource(R.string.value_not_available)
-                )
-                DebugValue(
-                    stringResource(R.string.debug_last_error),
-                    state.glyph.lastError ?: stringResource(R.string.value_none)
-                )
             }
         }
     }

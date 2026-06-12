@@ -2,6 +2,7 @@ package com.example.nashitimer.ui.stats
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,74 +39,80 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
         }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            horizontal = 24.dp,
-            vertical = 18.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
-    ) {
-        item {
-            PageTitle(stringResource(R.string.nav_insights))
-        }
-        item {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    stringResource(R.string.stats_today),
-                    todaySessions.size.toString(),
-                    stringResource(R.string.unit_sessions),
-                    Modifier.weight(1f)
-                )
-                StatCard(
-                    stringResource(R.string.stats_all_time),
-                    totalMinutes.toString(),
-                    stringResource(R.string.unit_minutes),
-                    Modifier.weight(1f)
-                )
-            }
-        }
-        item {
-            Surface(
-                Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shape = MaterialTheme.shapes.large
-            ) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Column {
-                        Text(
-                            stringResource(R.string.stats_last_12_weeks),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Text(
-                            stringResource(R.string.stats_activity_summary),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    HeatmapWidget(counts, Modifier.fillMaxWidth())
+    Column(modifier = Modifier.fillMaxSize()) {
+        PageTitle(
+            text = stringResource(R.string.nav_insights),
+            modifier = Modifier.padding(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 18.dp)
+        )
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            item {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        stringResource(R.string.stats_today),
+                        todaySessions.size.toString(),
+                        stringResource(R.string.unit_sessions),
+                        Modifier.weight(1f)
+                    )
+                    StatCard(
+                        stringResource(R.string.stats_all_time),
+                        totalMinutes.toString(),
+                        stringResource(R.string.unit_minutes),
+                        Modifier.weight(1f)
+                    )
                 }
             }
-        }
-        if (sessions.isEmpty()) {
             item {
                 Surface(
                     Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
                     shape = MaterialTheme.shapes.large
                 ) {
-                    Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            stringResource(R.string.stats_empty_title),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            stringResource(R.string.stats_empty_description),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Column(
+                        Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column {
+                            Text(
+                                stringResource(R.string.stats_last_12_weeks),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                stringResource(R.string.stats_activity_summary),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        HeatmapWidget(counts, Modifier.fillMaxWidth())
+                    }
+                }
+            }
+            if (sessions.isEmpty()) {
+                item {
+                    Surface(
+                        Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+                        shape = MaterialTheme.shapes.large
+                    ) {
+                        Column(
+                            Modifier.padding(22.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.stats_empty_title),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                stringResource(R.string.stats_empty_description),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

@@ -4,39 +4,42 @@ import android.app.LocaleManager
 import android.os.LocaleList
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Timer
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.nashitimer.R
 import com.example.nashitimer.domain.model.ThemeMode
+import com.example.nashitimer.ui.components.NashiSwitch
 import com.example.nashitimer.ui.components.PageTitle
 import kotlin.math.roundToInt
 
@@ -66,12 +70,10 @@ fun SettingsScreen(
     onOpenAppearance: () -> Unit,
     onOpenDebug: () -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+    SettingsPage(
+        title = stringResource(R.string.settings_title),
+        onBack = onBack
     ) {
-        item { SettingsHeader(stringResource(R.string.settings_title), onBack) }
         item {
             CategorySetting(
                 icon = Icons.Rounded.Timer,
@@ -114,15 +116,10 @@ fun TimerSettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+    SettingsPage(
+        title = stringResource(R.string.settings_timer_section),
+        onBack = onBack
     ) {
-        item {
-            SettingsHeader(stringResource(R.string.settings_timer_section), onBack)
-        }
-
         item {
             SectionHeader(
                 title = stringResource(R.string.settings_focus_section),
@@ -201,12 +198,10 @@ fun ReminderSettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+    SettingsPage(
+        title = stringResource(R.string.settings_reminder_section),
+        onBack = onBack
     ) {
-        item { SettingsHeader(stringResource(R.string.settings_reminder_section), onBack) }
         item {
             SectionHeader(
                 title = stringResource(R.string.settings_completion_section),
@@ -245,12 +240,10 @@ fun AppearanceSettingsScreen(
         } ?: LanguageOption.FOLLOW_SYSTEM
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+    SettingsPage(
+        title = stringResource(R.string.settings_appearance_section),
+        onBack = onBack
     ) {
-        item { SettingsHeader(stringResource(R.string.settings_appearance_section), onBack) }
         item {
             SettingsCard {
                 ChoiceSetting(
@@ -261,7 +254,18 @@ fun AppearanceSettingsScreen(
                         FilterChip(
                             selected = settings.themeMode == mode,
                             onClick = { viewModel.setTheme(mode) },
-                            label = { Text(mode.displayName()) }
+                            label = { Text(mode.displayName()) },
+                            leadingIcon = if (settings.themeMode == mode) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            } else {
+                                null
+                            }
                         )
                     }
                 }
@@ -284,8 +288,36 @@ fun AppearanceSettingsScreen(
 }
 
 @Composable
-private fun SettingsHeader(title: String, onBack: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun SettingsPage(
+    title: String,
+    onBack: () -> Unit,
+    content: LazyListScope.() -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        SettingsHeader(
+            title = title,
+            onBack = onBack,
+            modifier = Modifier.padding(start = 24.dp, top = 18.dp, end = 24.dp, bottom = 14.dp)
+        )
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 40.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SettingsHeader(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         IconButton(
             onClick = onBack,
             modifier = Modifier.size(36.dp)
@@ -498,13 +530,17 @@ private fun ChoiceSetting(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SettingText(label, description)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             choices()
         }
     }
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun LanguageDropdownSetting(
     label: String,
     description: String,
@@ -515,34 +551,44 @@ private fun LanguageDropdownSetting(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SettingText(label, description)
-        Box(Modifier.fillMaxWidth()) {
-            OutlinedButton(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(stringResource(selected.labelRes))
-                    Icon(
-                        imageVector = Icons.Rounded.KeyboardArrowDown,
-                        contentDescription = null
-                    )
-                }
-            }
-            DropdownMenu(
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            OutlinedTextField(
+                value = stringResource(selected.labelRes),
+                onValueChange = {},
+                modifier = Modifier
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth(),
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            )
+            ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.widthIn(min = 200.dp, max = 280.dp)
+                onDismissRequest = { expanded = false }
             ) {
                 LanguageOption.entries.forEach { language ->
+                    val isSelected = language == selected
                     DropdownMenuItem(
                         text = { Text(stringResource(language.labelRes)) },
                         onClick = {
                             expanded = false
                             onSelect(language)
+                        },
+                        trailingIcon = if (isSelected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null
+                                )
+                            }
+                        } else {
+                            null
                         }
                     )
                 }
@@ -564,7 +610,7 @@ private fun ToggleSetting(
         verticalAlignment = Alignment.CenterVertically
     ) {
         SettingText(label, description, Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        NashiSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 

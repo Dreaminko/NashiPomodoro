@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.nashitimer.MainActivity
@@ -23,13 +24,20 @@ class PomodoroService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(NOTIFICATION_ID, notification(intent?.getStringExtra(EXTRA_TIME) ?: "--:--"))
+        startForeground(
+            NOTIFICATION_ID,
+            notification(
+                time = intent?.getStringExtra(EXTRA_TIME) ?: "--:--",
+                remainingMs = intent?.getLongExtra(EXTRA_REMAINING_MS, 0L) ?: 0L,
+                totalMs = intent?.getLongExtra(EXTRA_TOTAL_MS, 0L) ?: 0L
+            )
+        )
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(time: String): Notification {
+    private fun notification(time: String, remainingMs: Long, totalMs: Long): Notification {
         val openIntent = PendingIntent.getActivity(
             this,
             0,
@@ -42,15 +50,30 @@ class PomodoroService : Service() {
             Intent(this, PomodoroService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val progress = calculateProgress(remainingMs, totalMs)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(time)
             .setContentText(getString(R.string.notification_running))
             .setContentIntent(openIntent)
             .addAction(0, getString(R.string.action_end), stopIntent)
+            .setProgress(PROGRESS_MAX, progress, totalMs <= 0L)
             .setOngoing(true)
             .setSilent(true)
             .build()
+
+        return if (Build.VERSION.SDK_INT >= 36 && totalMs > 0L) {
+            Notification.Builder.recoverBuilder(this, notification)
+                .setStyle(
+                    Notification.ProgressStyle()
+                        .addProgressSegment(Notification.ProgressStyle.Segment(PROGRESS_MAX))
+                        .setProgress(progress)
+                        .setStyledByProgress(true)
+                )
+                .build()
+        } else {
+            notification
+        }
     }
 
     private fun createChannel() {
@@ -66,7 +89,16 @@ class PomodoroService : Service() {
     companion object {
         const val CHANNEL_ID = "nashitimer_pomodoro"
         private const val NOTIFICATION_ID = 42
+        private const val PROGRESS_MAX = 1000
         const val ACTION_STOP = "com.example.nashitimer.STOP"
         const val EXTRA_TIME = "extra_time"
+        const val EXTRA_REMAINING_MS = "extra_remaining_ms"
+        const val EXTRA_TOTAL_MS = "extra_total_ms"
+
+        private fun calculateProgress(remainingMs: Long, totalMs: Long): Int {
+            if (totalMs <= 0L) return 0
+            val elapsedFraction = 1.0 - remainingMs.coerceIn(0L, totalMs).toDouble() / totalMs
+            return (elapsedFraction * PROGRESS_MAX).toInt().coerceIn(0, PROGRESS_MAX)
+        }
     }
 }

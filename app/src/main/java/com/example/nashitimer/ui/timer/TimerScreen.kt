@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -104,15 +103,10 @@ fun TimerScreen(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                PageTitle(stringResource(R.string.nav_focus))
-            }
-            IconButton(
-                onClick = onOpenSettings,
-                modifier = Modifier.offset(y = (-7).dp)
-            ) {
+            PageTitle(stringResource(R.string.nav_focus))
+            IconButton(onClick = onOpenSettings) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
                     contentDescription = stringResource(R.string.timer_open_settings)
