@@ -6,7 +6,7 @@ add a translation.
 ## Add a language
 
 1. Copy `app/src/main/res/values/strings.xml`.
-2. Create the locale directory for the new language, such as `values-ja` or
+2. Create the locale directory for the new language, such as `values-ko` or
    `values-fr`.
 3. Save the translated file as `strings.xml` in that directory.
 4. Keep every `name` unchanged and preserve placeholders such as `%1$d`.

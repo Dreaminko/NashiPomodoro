@@ -630,5 +630,6 @@ private enum class LanguageOption(
 ) {
     FOLLOW_SYSTEM(null, null, R.string.language_system),
     ENGLISH("en", "en", R.string.language_english),
-    SIMPLIFIED_CHINESE("zh", "zh-CN", R.string.language_simplified_chinese)
+    SIMPLIFIED_CHINESE("zh", "zh-CN", R.string.language_simplified_chinese),
+    JAPANESE("ja", "ja", R.string.language_japanese)
 }

@@ -91,7 +91,6 @@ fun NashiTimerTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

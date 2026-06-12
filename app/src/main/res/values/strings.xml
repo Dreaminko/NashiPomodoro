@@ -103,6 +103,7 @@
     <string name="language_system">Follow system</string>
     <string name="language_english">English</string>
     <string name="language_simplified_chinese">Simplified Chinese</string>
+    <string name="language_japanese">Japanese</string>
     <string name="settings_feedback_section">Feedback</string>
     <string name="settings_other_section">Reminders and advanced</string>
     <string name="settings_other_section_description">Session feedback and testing tools</string>

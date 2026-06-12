@@ -105,11 +105,18 @@ fun TimerScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PageTitle(stringResource(R.string.nav_focus))
-            IconButton(onClick = onOpenSettings) {
+            PageTitle(
+                text = stringResource(R.string.nav_focus),
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(
+                onClick = onOpenSettings,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
-                    contentDescription = stringResource(R.string.timer_open_settings)
+                    contentDescription = stringResource(R.string.timer_open_settings),
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
