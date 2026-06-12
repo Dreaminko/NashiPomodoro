@@ -3,10 +3,10 @@ package com.example.nashitimer.ui.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nashitimer.data.repository.HistoryRepository
-import com.example.nashitimer.domain.model.PomodoroSession
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -14,9 +14,11 @@ import javax.inject.Inject
 class StatsViewModel @Inject constructor(
     repository: HistoryRepository
 ) : ViewModel() {
-    val sessions: StateFlow<List<PomodoroSession>> = repository.allSessions().stateIn(
+    val stats: StateFlow<StatsSnapshot> = repository.allSessions()
+        .map(::buildStatsSnapshot)
+        .stateIn(
         viewModelScope,
-        SharingStarted.Eagerly,
-        emptyList()
+        SharingStarted.WhileSubscribed(5_000),
+        StatsSnapshot()
     )
 }
