@@ -18,7 +18,7 @@ fun ProgressRing(
     modifier: Modifier = Modifier,
     activeColor: Color = MaterialTheme.colorScheme.primary
 ) {
-    val track = MaterialTheme.colorScheme.surfaceVariant
+    val track = MaterialTheme.colorScheme.surfaceContainerHighest
     Canvas(modifier = modifier.size(276.dp)) {
         val stroke = 12.dp.toPx()
         val arcSize = Size(size.width - stroke, size.height - stroke)

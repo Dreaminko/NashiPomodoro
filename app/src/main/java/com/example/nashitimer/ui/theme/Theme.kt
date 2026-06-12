@@ -17,14 +17,23 @@ import androidx.compose.ui.unit.dp
 private val DarkColorScheme = darkColorScheme(
     primary = FocusWarm,
     primaryContainer = Color(0xFF512306),
+    onSecondary = Color(0xFF003826),
     secondary = BreakMint,
     secondaryContainer = Color(0xFF153D2E),
+    onSecondaryContainer = Color(0xFFAAF4D2),
     tertiary = LongBreakBlue,
+    tertiaryContainer = Color(0xFF173640),
+    onTertiaryContainer = Color(0xFFC5EAF7),
     background = NothingBlack,
     surface = DarkSurface,
     surfaceVariant = DarkSurfaceContainer,
+    surfaceContainerLowest = Color(0xFF0F0E0C),
+    surfaceContainerLow = Color(0xFF1E1C19),
     surfaceContainer = DarkSurfaceContainer,
+    surfaceContainerHigh = Color(0xFF302D29),
+    surfaceContainerHighest = Color(0xFF3B3834),
     outline = Color(0xFF4B4640),
+    outlineVariant = Color(0xFF4B4640),
     onPrimary = NothingBlack,
     onPrimaryContainer = Color(0xFFFFDBC4),
     onBackground = NothingWhite,
@@ -35,14 +44,23 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = FocusWarmDark,
     primaryContainer = Color(0xFFFFDBC4),
+    onSecondary = Color.White,
     secondary = BreakMintDark,
     secondaryContainer = Color(0xFFB0F1D1),
+    onSecondaryContainer = Color(0xFF002116),
     tertiary = Color(0xFF315A69),
+    tertiaryContainer = Color(0xFFC5EAF7),
+    onTertiaryContainer = Color(0xFF001F28),
     background = LightSurface,
     surface = NothingWhite,
     surfaceVariant = LightSurfaceContainer,
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFFFF1E7),
     surfaceContainer = LightSurfaceContainer,
+    surfaceContainerHigh = Color(0xFFEDE4DC),
+    surfaceContainerHighest = Color(0xFFE6DED6),
     outline = Color(0xFFCFC4BA),
+    outlineVariant = Color(0xFFD8CFC6),
     onPrimary = Color.White,
     onPrimaryContainer = Color(0xFF321200),
     onBackground = NothingBlack,
@@ -51,9 +69,11 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val AppShapes = Shapes(
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(20.dp),
-    large = RoundedCornerShape(28.dp)
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(28.dp)
 )
 
 @Composable

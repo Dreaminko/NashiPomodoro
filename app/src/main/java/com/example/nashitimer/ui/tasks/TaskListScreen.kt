@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -53,7 +54,7 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
         }
 
         Surface(
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             shape = MaterialTheme.shapes.large
         ) {
             Row(
@@ -85,7 +86,7 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
         if (tasks.isEmpty()) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = MaterialTheme.shapes.large
             ) {
                 Column(
@@ -107,7 +108,13 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(tasks, key = { it.id }) { task ->
-                    Card(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.large,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        )
+                    ) {
                         Row(
                             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -16,8 +17,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,9 @@ enum class AppRoute(val route: String) {
     STATS("stats"),
     TASKS("tasks"),
     SETTINGS("settings"),
+    SETTINGS_TIMER("settings/timer"),
+    SETTINGS_REMINDER("settings/reminder"),
+    SETTINGS_APPEARANCE("settings/appearance"),
     DEBUG("debug")
 }
 
@@ -78,10 +82,9 @@ fun BottomNavBar(navController: NavHostController, destination: NavDestination?)
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                alpha = 0.55f
-                            ),
-                            indicatorColor = androidx.compose.ui.graphics.Color.Transparent
+                            unselectedIconColor =
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.55f),
+                            indicatorColor = Color.Transparent
                         )
                     )
                 }
@@ -96,6 +99,9 @@ private val AppRoute.labelRes: Int
         AppRoute.STATS -> R.string.nav_insights
         AppRoute.TASKS -> R.string.nav_tasks
         AppRoute.SETTINGS -> R.string.settings_title
+        AppRoute.SETTINGS_TIMER -> R.string.settings_timer_section
+        AppRoute.SETTINGS_REMINDER -> R.string.settings_reminder_section
+        AppRoute.SETTINGS_APPEARANCE -> R.string.settings_appearance_section
         AppRoute.DEBUG -> R.string.debug_title
     }
 
@@ -104,5 +110,9 @@ private val AppRoute.icon: ImageVector
         AppRoute.TIMER -> Icons.Rounded.Timer
         AppRoute.STATS -> Icons.Rounded.Insights
         AppRoute.TASKS -> Icons.Rounded.Checklist
-        AppRoute.SETTINGS, AppRoute.DEBUG -> Icons.Rounded.Timer
+        AppRoute.SETTINGS,
+        AppRoute.SETTINGS_TIMER,
+        AppRoute.SETTINGS_REMINDER,
+        AppRoute.SETTINGS_APPEARANCE,
+        AppRoute.DEBUG -> Icons.Rounded.Timer
     }

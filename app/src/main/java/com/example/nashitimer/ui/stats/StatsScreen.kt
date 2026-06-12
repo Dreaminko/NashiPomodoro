@@ -71,7 +71,7 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
         item {
             Surface(
                 Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
                 shape = MaterialTheme.shapes.large
             ) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -122,7 +122,7 @@ private fun StatCard(
 ) {
     Surface(
         modifier,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = MaterialTheme.shapes.large
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

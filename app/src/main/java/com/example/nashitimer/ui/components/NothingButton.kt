@@ -2,9 +2,9 @@ package com.example.nashitimer.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,13 +18,12 @@ fun NothingButton(
     primary: Boolean = false,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(18.dp)
-    val contentPadding = PaddingValues(horizontal = 28.dp, vertical = 16.dp)
+    val contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
     if (primary) {
         Button(
             onClick = onClick,
             modifier = modifier.defaultMinSize(minHeight = 54.dp),
-            shape = shape,
+            shape = MaterialTheme.shapes.extraLarge,
             contentPadding = contentPadding
         ) {
             Text(text)
@@ -33,7 +32,7 @@ fun NothingButton(
         OutlinedButton(
             onClick = onClick,
             modifier = modifier.defaultMinSize(minHeight = 54.dp),
-            shape = shape,
+            shape = MaterialTheme.shapes.extraLarge,
             border = ButtonDefaults.outlinedButtonBorder(enabled = true),
             contentPadding = contentPadding
         ) {

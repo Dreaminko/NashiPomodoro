@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -55,13 +56,16 @@ fun DebugScreen(
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = stringResource(R.string.action_back)
                     )
                 }
-                Column(Modifier.padding(start = 8.dp)) {
+                Column(Modifier.padding(start = 12.dp)) {
                     PageTitle(stringResource(R.string.debug_title))
                 }
             }
@@ -195,7 +199,7 @@ fun DebugScreen(
 @Composable
 private fun DebugCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = MaterialTheme.shapes.large
     ) {
         Column(

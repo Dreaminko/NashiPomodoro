@@ -10,8 +10,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.nashitimer.ui.settings.SettingsScreen
+import com.example.nashitimer.ui.settings.AppearanceSettingsScreen
 import com.example.nashitimer.ui.settings.DebugScreen
+import com.example.nashitimer.ui.settings.ReminderSettingsScreen
+import com.example.nashitimer.ui.settings.SettingsScreen
+import com.example.nashitimer.ui.settings.TimerSettingsScreen
 import com.example.nashitimer.ui.stats.StatsScreen
 import com.example.nashitimer.ui.tasks.TaskListScreen
 import com.example.nashitimer.ui.timer.TimerScreen
@@ -23,6 +26,9 @@ fun AppNavigation() {
     val destination = backStackEntry?.destination
     val showBottomBar = destination?.route !in setOf(
         AppRoute.SETTINGS.route,
+        AppRoute.SETTINGS_TIMER.route,
+        AppRoute.SETTINGS_REMINDER.route,
+        AppRoute.SETTINGS_APPEARANCE.route,
         AppRoute.DEBUG.route
     )
 
@@ -45,8 +51,24 @@ fun AppNavigation() {
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
+                    onOpenTimer = { navController.navigate(AppRoute.SETTINGS_TIMER.route) },
+                    onOpenReminder = {
+                        navController.navigate(AppRoute.SETTINGS_REMINDER.route)
+                    },
+                    onOpenAppearance = {
+                        navController.navigate(AppRoute.SETTINGS_APPEARANCE.route)
+                    },
                     onOpenDebug = { navController.navigate(AppRoute.DEBUG.route) }
                 )
+            }
+            composable(AppRoute.SETTINGS_TIMER.route) {
+                TimerSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(AppRoute.SETTINGS_REMINDER.route) {
+                ReminderSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(AppRoute.SETTINGS_APPEARANCE.route) {
+                AppearanceSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(AppRoute.DEBUG.route) {
                 DebugScreen(onBack = { navController.popBackStack() })

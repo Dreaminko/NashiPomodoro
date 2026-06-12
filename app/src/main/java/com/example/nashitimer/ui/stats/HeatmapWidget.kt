@@ -115,7 +115,7 @@ private fun ContributionCell(color: Color) {
 private fun contributionColors(): List<Color> {
     val active = MaterialTheme.colorScheme.primary
     return listOf(
-        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.surfaceContainerHighest,
         active.copy(alpha = 0.28f),
         active.copy(alpha = 0.5f),
         active.copy(alpha = 0.72f),

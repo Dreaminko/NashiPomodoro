@@ -111,10 +111,7 @@ fun TimerScreen(
             }
             IconButton(
                 onClick = onOpenSettings,
-                modifier = Modifier
-                    .offset(y = (-7).dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                modifier = Modifier.offset(y = (-7).dp)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
@@ -164,7 +161,7 @@ fun TimerScreen(
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = MaterialTheme.shapes.large
         ) {
             Row(
