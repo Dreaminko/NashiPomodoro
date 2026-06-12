@@ -11,18 +11,21 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 
-enum class AppRoute(val route: String, val label: String) {
-    TIMER("timer", "Focus"),
-    STATS("stats", "Insights"),
-    TASKS("tasks", "Tasks"),
-    SETTINGS("settings", "Settings"),
-    DEBUG("debug", "Debug")
+import com.example.nashitimer.R
+
+enum class AppRoute(val route: String) {
+    TIMER("timer"),
+    STATS("stats"),
+    TASKS("tasks"),
+    SETTINGS("settings"),
+    DEBUG("debug")
 }
 
 @Composable
@@ -33,6 +36,7 @@ fun BottomNavBar(navController: NavHostController, destination: NavDestination?)
     ) {
         listOf(AppRoute.TASKS, AppRoute.TIMER, AppRoute.STATS).forEach { item ->
             val selected = destination?.hierarchy?.any { it.route == item.route } == true
+            val label = stringResource(item.labelRes)
             NavigationBarItem(
                 selected = selected,
                 onClick = {
@@ -45,10 +49,10 @@ fun BottomNavBar(navController: NavHostController, destination: NavDestination?)
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label
+                        contentDescription = label
                     )
                 },
-                label = { Text(item.label) },
+                label = { Text(label) },
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -56,6 +60,15 @@ fun BottomNavBar(navController: NavHostController, destination: NavDestination?)
         }
     }
 }
+
+private val AppRoute.labelRes: Int
+    get() = when (this) {
+        AppRoute.TIMER -> R.string.nav_focus
+        AppRoute.STATS -> R.string.nav_insights
+        AppRoute.TASKS -> R.string.nav_tasks
+        AppRoute.SETTINGS -> R.string.settings_title
+        AppRoute.DEBUG -> R.string.debug_title
+    }
 
 private val AppRoute.icon: ImageVector
     get() = when (this) {

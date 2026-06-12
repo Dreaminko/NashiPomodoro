@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -63,6 +65,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.R
 import com.example.nashitimer.domain.model.TimerPhase
 import com.example.nashitimer.ui.components.PageTitle
 import com.example.nashitimer.ui.components.ProgressRing
@@ -101,23 +104,21 @@ fun TimerScreen(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             Column {
-                PageTitle(
-                    text = "NashiTimer",
-                    color = MaterialTheme.colorScheme.primary
-                )
+                PageTitle("NashiTimer")
             }
             IconButton(
                 onClick = onOpenSettings,
                 modifier = Modifier
+                    .offset(y = (-7).dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
-                    contentDescription = "Open settings"
+                    contentDescription = stringResource(R.string.timer_open_settings)
                 )
             }
         }
@@ -133,7 +134,7 @@ fun TimerScreen(
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = uiState.timer.phase.label.uppercase(),
+                        text = stringResource(uiState.timer.phase.labelRes).uppercase(),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -146,7 +147,13 @@ fun TimerScreen(
                     fontWeight = FontWeight.Light
                 )
                 Text(
-                    if (uiState.timer.isRunning) "Stay with this moment" else "Ready when you are",
+                    stringResource(
+                        if (uiState.timer.isRunning) {
+                            R.string.timer_running_hint
+                        } else {
+                            R.string.timer_ready_hint
+                        }
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -174,12 +181,23 @@ fun TimerScreen(
                 )
                 Column(Modifier.padding(start = 12.dp)) {
                     Text(
-                        if (uiState.timer.isFaceDown) "Glyph focus is active" else "Flip your phone to begin",
+                        stringResource(
+                            if (uiState.timer.isFaceDown) {
+                                R.string.timer_glyph_active
+                            } else {
+                                R.string.timer_flip_to_begin
+                            }
+                        ),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        if (uiState.timer.isFaceDown) "Screen dimmed to keep distractions away"
-                        else "The timer follows the position of your phone",
+                        stringResource(
+                            if (uiState.timer.isFaceDown) {
+                                R.string.timer_screen_dimmed
+                            } else {
+                                R.string.timer_phone_position_hint
+                            }
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -208,7 +226,7 @@ fun TimerScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Stop,
-                        contentDescription = "End session",
+                        contentDescription = stringResource(R.string.timer_end_session),
                         modifier = Modifier.size(30.dp)
                     )
                 }
@@ -228,11 +246,13 @@ fun TimerScreen(
                         } else {
                             Icons.Rounded.PlayArrow
                         },
-                        contentDescription = if (uiState.timer.isRunning) {
-                            "Pause focus"
+                        contentDescription = stringResource(
+                            if (uiState.timer.isRunning) {
+                                R.string.timer_pause_focus
                         } else {
-                            "Start focus"
-                        },
+                                R.string.timer_start_focus
+                            }
+                        ),
                         modifier = Modifier.size(30.dp)
                     )
                 }
@@ -244,7 +264,11 @@ fun TimerScreen(
         }
 
         Text(
-            text = "Round ${uiState.timer.completedFocusRounds + 1}  |  Long break every ${uiState.settings.longBreakInterval}",
+            text = stringResource(
+                R.string.timer_round_summary,
+                uiState.timer.completedFocusRounds + 1,
+                uiState.settings.longBreakInterval
+            ),
             modifier = Modifier.padding(top = 14.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium
@@ -257,6 +281,8 @@ private fun LongPressSkipButton(
     onLongClick: () -> Unit,
     enabled: Boolean
 ) {
+    val skipDescription = stringResource(R.string.timer_long_press_skip)
+    val skipAction = stringResource(R.string.timer_skip_current_phase)
     val containerColor = MaterialTheme.colorScheme.secondaryContainer
     val contentColor = MaterialTheme.colorScheme.onSecondaryContainer
     val progressColor = MaterialTheme.colorScheme.primary
@@ -269,9 +295,9 @@ private fun LongPressSkipButton(
             .size(72.dp)
             .semantics {
                 role = Role.Button
-                contentDescription = "Long press to skip current phase"
+                contentDescription = skipDescription
                 if (enabled) {
-                    onLongClick("Skip current phase") {
+                    onLongClick(skipAction) {
                         currentOnLongClick()
                         true
                     }
@@ -359,3 +385,12 @@ private fun phaseColor(phase: TimerPhase): Color = when (phase) {
     TimerPhase.LONG_BREAK -> MaterialTheme.colorScheme.tertiary
     else -> MaterialTheme.colorScheme.primary
 }
+
+private val TimerPhase.labelRes: Int
+    get() = when (this) {
+        TimerPhase.IDLE -> R.string.timer_ready
+        TimerPhase.FOCUS -> R.string.timer_focus
+        TimerPhase.SHORT_BREAK -> R.string.timer_short_break
+        TimerPhase.LONG_BREAK -> R.string.timer_long_break
+        TimerPhase.PAUSED -> R.string.timer_paused
+    }

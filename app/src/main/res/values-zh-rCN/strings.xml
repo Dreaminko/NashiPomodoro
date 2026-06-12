@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">NashiTimer</string>
+
+    <string name="nav_focus">专注</string>
+    <string name="nav_insights">统计</string>
+    <string name="nav_tasks">任务</string>
+
+    <string name="action_back">返回</string>
+    <string name="action_add">添加</string>
+    <string name="action_remove">删除</string>
+    <string name="action_end">结束</string>
+    <string name="action_apply_test_duration">应用测试时长</string>
+    <string name="action_off">关闭</string>
+
+    <string name="timer_open_settings">打开设置</string>
+    <string name="timer_ready">就绪</string>
+    <string name="timer_focus">专注</string>
+    <string name="timer_short_break">短休息</string>
+    <string name="timer_long_break">长休息</string>
+    <string name="timer_paused">已暂停</string>
+    <string name="timer_running_hint">专注于此刻</string>
+    <string name="timer_ready_hint">准备好后即可开始</string>
+    <string name="timer_glyph_active">Glyph 专注已开启</string>
+    <string name="timer_flip_to_begin">翻转手机即可开始</string>
+    <string name="timer_screen_dimmed">屏幕已调暗，减少干扰</string>
+    <string name="timer_phone_position_hint">计时器会跟随手机姿态运行</string>
+    <string name="timer_end_session">结束本轮</string>
+    <string name="timer_pause_focus">暂停专注</string>
+    <string name="timer_start_focus">开始专注</string>
+    <string name="timer_long_press_skip">长按跳过当前阶段</string>
+    <string name="timer_skip_current_phase">跳过当前阶段</string>
+    <string name="timer_round_summary">第 %1$d 轮  |  每 %2$d 轮长休息</string>
+
+    <string name="tasks_summary">%1$d 项待办 | %2$d 项已完成</string>
+    <string name="tasks_input_placeholder">接下来要专注什么？</string>
+    <string name="tasks_empty_title">清静的任务清单</string>
+    <string name="tasks_empty_description">添加一项重要任务，把下一轮专注留给它。</string>
+    <string name="tasks_session_progress">已完成 %1$d / %2$d 轮</string>
+    <string name="task_detail_title">任务详情</string>
+
+    <string name="stats_today">今天</string>
+    <string name="stats_all_time">累计</string>
+    <string name="unit_sessions">轮专注</string>
+    <string name="unit_minutes">分钟</string>
+    <string name="stats_last_12_weeks">最近 12 周</string>
+    <string name="stats_activity_summary">一览你的专注活动</string>
+    <string name="stats_empty_title">你的记录从这里开始</string>
+    <string name="stats_empty_description">完成一轮专注后，活动记录会显示在这里。</string>
+    <string name="heatmap_less">少</string>
+    <string name="heatmap_more">多</string>
+    <string name="weekday_mon">一</string>
+    <string name="weekday_wed">三</string>
+    <string name="weekday_fri">五</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_timer_section">计时器</string>
+    <string name="settings_focus">专注</string>
+    <string name="settings_short_break">短休息</string>
+    <string name="settings_long_break">长休息</string>
+    <string name="settings_long_break_interval">长休息间隔</string>
+    <string name="settings_daily_goal">每日目标</string>
+    <string name="unit_min">分钟</string>
+    <string name="unit_rounds">轮</string>
+    <string name="settings_appearance_section">外观</string>
+    <string name="settings_theme">主题</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="settings_language">语言</string>
+    <string name="language_english">英语</string>
+    <string name="language_simplified_chinese">简体中文</string>
+    <string name="settings_feedback_section">反馈</string>
+    <string name="settings_completion_vibration">完成时振动</string>
+    <string name="settings_completion_vibration_description">每轮结束时以轻柔振动提醒</string>
+    <string name="settings_developer_section">开发者</string>
+    <string name="settings_debug">调试</string>
+    <string name="settings_debug_enabled">已启用 · 专注时长 %1$d 秒</string>
+    <string name="settings_debug_description">设备诊断与测试控制</string>
+    <string name="settings_open_debug">打开调试设置</string>
+
+    <string name="debug_title">调试</string>
+    <string name="debug_mode">调试模式</string>
+    <string name="debug_mode_description">使用以秒为单位的自定义专注时长</string>
+    <string name="debug_focus_duration">专注时长</string>
+    <string name="unit_seconds">秒</string>
+    <string name="debug_duration_range">允许范围：1-3600 秒</string>
+    <string name="debug_glyph_test">Glyph 测试</string>
+    <string name="debug_device">设备</string>
+    <string name="debug_manufacturer">制造商</string>
+    <string name="debug_brand">品牌</string>
+    <string name="debug_model">型号</string>
+    <string name="debug_profile">配置</string>
+    <string name="debug_progress_channel">进度通道</string>
+    <string name="debug_glyph_bar_supported">支持 Glyph 灯条</string>
+    <string name="debug_glyph_session">Glyph 会话</string>
+    <string name="debug_service_connected">服务已连接</string>
+    <string name="debug_registered">已注册</string>
+    <string name="debug_session_open">会话已开启</string>
+    <string name="debug_registration_target">注册目标</string>
+    <string name="debug_last_effect">上次效果</string>
+    <string name="debug_last_error">上次错误</string>
+    <string name="value_not_available">不适用</string>
+    <string name="value_none">无</string>
+    <string name="value_yes">是</string>
+    <string name="value_no">否</string>
+
+    <string name="notification_running">NashiTimer 正在运行</string>
+    <string name="notification_channel_name">NashiTimer 番茄钟</string>
+</resources>

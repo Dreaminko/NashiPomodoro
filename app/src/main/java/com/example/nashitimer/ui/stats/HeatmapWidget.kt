@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.nashitimer.R
 import java.time.LocalDate
 
 private val CellSize = 14.dp
@@ -55,13 +57,13 @@ fun HeatmapWidget(counts: List<Int>, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Text(
-                text = "Less",
+                text = stringResource(R.string.heatmap_less),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             levels.forEach { color -> ContributionCell(color) }
             Text(
-                text = "More",
+                text = stringResource(R.string.heatmap_more),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -75,7 +77,15 @@ private fun WeekdayLabels() {
         modifier = Modifier.width(28.dp),
         verticalArrangement = Arrangement.spacedBy(CellSpacing)
     ) {
-        listOf("", "Mon", "", "Wed", "", "Fri", "").forEach { label ->
+        listOf(
+            "",
+            stringResource(R.string.weekday_mon),
+            "",
+            stringResource(R.string.weekday_wed),
+            "",
+            stringResource(R.string.weekday_fri),
+            ""
+        ).forEach { label ->
             Box(
                 modifier = Modifier.height(CellSize),
                 contentAlignment = Alignment.CenterStart

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -28,10 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.R
 import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
@@ -56,11 +58,11 @@ fun DebugScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(R.string.action_back)
                     )
                 }
                 Column(Modifier.padding(start = 8.dp)) {
-                    PageTitle("Debug")
+                    PageTitle(stringResource(R.string.debug_title))
                 }
             }
         }
@@ -73,9 +75,12 @@ fun DebugScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Debug mode", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Use a custom focus duration measured in seconds",
+                            stringResource(R.string.debug_mode),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            stringResource(R.string.debug_mode_description),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -92,9 +97,9 @@ fun DebugScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = state.settings.debugModeEnabled,
-                    label = { Text("Focus duration") },
-                    suffix = { Text("seconds") },
-                    supportingText = { Text("Allowed range: 1-3600 seconds") },
+                    label = { Text(stringResource(R.string.debug_focus_duration)) },
+                    suffix = { Text(stringResource(R.string.unit_seconds)) },
+                    supportingText = { Text(stringResource(R.string.debug_duration_range)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
                 )
@@ -105,14 +110,17 @@ fun DebugScreen(
                     enabled = state.settings.debugModeEnabled,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Apply test duration")
+                    Text(stringResource(R.string.action_apply_test_duration))
                 }
             }
         }
 
         item {
             DebugCard {
-                Text("Glyph test", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.debug_glyph_test),
+                    style = MaterialTheme.typography.titleMedium
+                )
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -124,7 +132,7 @@ fun DebugScreen(
                         Text("50%")
                     }
                     Button(onClick = viewModel::turnOffGlyph, modifier = Modifier.weight(1f)) {
-                        Text("Off")
+                        Text(stringResource(R.string.action_off))
                     }
                 }
             }
@@ -132,25 +140,53 @@ fun DebugScreen(
 
         item {
             DebugCard {
-                Text("Device", style = MaterialTheme.typography.titleMedium)
-                DebugValue("Manufacturer", state.manufacturer)
-                DebugValue("Brand", state.brand)
-                DebugValue("Model", state.model)
-                DebugValue("Profile", state.profile)
-                DebugValue("Progress channel", state.progressChannel)
-                DebugValue("Glyph bar supported", state.supportsGlyphBar.toString())
+                Text(
+                    stringResource(R.string.debug_device),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                DebugValue(stringResource(R.string.debug_manufacturer), state.manufacturer)
+                DebugValue(stringResource(R.string.debug_brand), state.brand)
+                DebugValue(stringResource(R.string.debug_model), state.model)
+                DebugValue(stringResource(R.string.debug_profile), state.profile)
+                DebugValue(stringResource(R.string.debug_progress_channel), state.progressChannel)
+                DebugValue(
+                    stringResource(R.string.debug_glyph_bar_supported),
+                    localizedBoolean(state.supportsGlyphBar)
+                )
             }
         }
 
         item {
             DebugCard {
-                Text("Glyph session", style = MaterialTheme.typography.titleMedium)
-                DebugValue("Service connected", state.glyph.serviceConnected.toString())
-                DebugValue("Registered", state.glyph.registered.toString())
-                DebugValue("Session open", state.glyph.sessionOpen.toString())
-                DebugValue("Registration target", state.glyph.registrationTarget ?: "N/A")
-                DebugValue("Last effect", state.glyph.lastEffect ?: "N/A")
-                DebugValue("Last error", state.glyph.lastError ?: "None")
+                Text(
+                    stringResource(R.string.debug_glyph_session),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                DebugValue(
+                    stringResource(R.string.debug_service_connected),
+                    localizedBoolean(state.glyph.serviceConnected)
+                )
+                DebugValue(
+                    stringResource(R.string.debug_registered),
+                    localizedBoolean(state.glyph.registered)
+                )
+                DebugValue(
+                    stringResource(R.string.debug_session_open),
+                    localizedBoolean(state.glyph.sessionOpen)
+                )
+                DebugValue(
+                    stringResource(R.string.debug_registration_target),
+                    state.glyph.registrationTarget
+                        ?: stringResource(R.string.value_not_available)
+                )
+                DebugValue(
+                    stringResource(R.string.debug_last_effect),
+                    state.glyph.lastEffect ?: stringResource(R.string.value_not_available)
+                )
+                DebugValue(
+                    stringResource(R.string.debug_last_error),
+                    state.glyph.lastError ?: stringResource(R.string.value_none)
+                )
             }
         }
     }
@@ -185,3 +221,7 @@ private fun DebugValue(label: String, value: String) {
         )
     }
 }
+
+@Composable
+private fun localizedBoolean(value: Boolean): String =
+    stringResource(if (value) R.string.value_yes else R.string.value_no)

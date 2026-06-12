@@ -1,3 +1,109 @@
 <resources>
     <string name="app_name">NashiTimer</string>
+
+    <string name="nav_focus">Focus</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_tasks">Tasks</string>
+
+    <string name="action_back">Back</string>
+    <string name="action_add">Add</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_end">End</string>
+    <string name="action_apply_test_duration">Apply test duration</string>
+    <string name="action_off">Off</string>
+
+    <string name="timer_open_settings">Open settings</string>
+    <string name="timer_ready">Ready</string>
+    <string name="timer_focus">Focus</string>
+    <string name="timer_short_break">Short break</string>
+    <string name="timer_long_break">Long break</string>
+    <string name="timer_paused">Paused</string>
+    <string name="timer_running_hint">Stay with this moment</string>
+    <string name="timer_ready_hint">Ready when you are</string>
+    <string name="timer_glyph_active">Glyph focus is active</string>
+    <string name="timer_flip_to_begin">Flip your phone to begin</string>
+    <string name="timer_screen_dimmed">Screen dimmed to keep distractions away</string>
+    <string name="timer_phone_position_hint">The timer follows the position of your phone</string>
+    <string name="timer_end_session">End session</string>
+    <string name="timer_pause_focus">Pause focus</string>
+    <string name="timer_start_focus">Start focus</string>
+    <string name="timer_long_press_skip">Long press to skip current phase</string>
+    <string name="timer_skip_current_phase">Skip current phase</string>
+    <string name="timer_round_summary">Round %1$d  |  Long break every %2$d</string>
+
+    <string name="tasks_summary">%1$d open | %2$d completed</string>
+    <string name="tasks_input_placeholder">What needs your focus?</string>
+    <string name="tasks_empty_title">A quiet list</string>
+    <string name="tasks_empty_description">Add one meaningful task and give it your next session.</string>
+    <string name="tasks_session_progress">%1$d of %2$d sessions</string>
+    <string name="task_detail_title">Task detail</string>
+
+    <string name="stats_today">Today</string>
+    <string name="stats_all_time">All time</string>
+    <string name="unit_sessions">sessions</string>
+    <string name="unit_minutes">minutes</string>
+    <string name="stats_last_12_weeks">Last 12 weeks</string>
+    <string name="stats_activity_summary">Your focus activity at a glance</string>
+    <string name="stats_empty_title">Your story starts here</string>
+    <string name="stats_empty_description">Complete a focus session and your activity will appear here.</string>
+    <string name="heatmap_less">Less</string>
+    <string name="heatmap_more">More</string>
+    <string name="weekday_mon">Mon</string>
+    <string name="weekday_wed">Wed</string>
+    <string name="weekday_fri">Fri</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_timer_section">Timer</string>
+    <string name="settings_focus">Focus</string>
+    <string name="settings_short_break">Short break</string>
+    <string name="settings_long_break">Long break</string>
+    <string name="settings_long_break_interval">Long break interval</string>
+    <string name="settings_daily_goal">Daily goal</string>
+    <string name="unit_min">min</string>
+    <string name="unit_rounds">rounds</string>
+    <string name="settings_appearance_section">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+    <string name="settings_language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_simplified_chinese">Simplified Chinese</string>
+    <string name="settings_feedback_section">Feedback</string>
+    <string name="settings_completion_vibration">Completion vibration</string>
+    <string name="settings_completion_vibration_description">A gentle signal when a session ends</string>
+    <string name="settings_developer_section">Developer</string>
+    <string name="settings_debug">Debug</string>
+    <string name="settings_debug_enabled">Enabled · %1$ds focus duration</string>
+    <string name="settings_debug_description">Device diagnostics and test controls</string>
+    <string name="settings_open_debug">Open debug settings</string>
+
+    <string name="debug_title">Debug</string>
+    <string name="debug_mode">Debug mode</string>
+    <string name="debug_mode_description">Use a custom focus duration measured in seconds</string>
+    <string name="debug_focus_duration">Focus duration</string>
+    <string name="unit_seconds">seconds</string>
+    <string name="debug_duration_range">Allowed range: 1-3600 seconds</string>
+    <string name="debug_glyph_test">Glyph test</string>
+    <string name="debug_device">Device</string>
+    <string name="debug_manufacturer">Manufacturer</string>
+    <string name="debug_brand">Brand</string>
+    <string name="debug_model">Model</string>
+    <string name="debug_profile">Profile</string>
+    <string name="debug_progress_channel">Progress channel</string>
+    <string name="debug_glyph_bar_supported">Glyph bar supported</string>
+    <string name="debug_glyph_session">Glyph session</string>
+    <string name="debug_service_connected">Service connected</string>
+    <string name="debug_registered">Registered</string>
+    <string name="debug_session_open">Session open</string>
+    <string name="debug_registration_target">Registration target</string>
+    <string name="debug_last_effect">Last effect</string>
+    <string name="debug_last_error">Last error</string>
+    <string name="value_not_available">N/A</string>
+    <string name="value_none">None</string>
+    <string name="value_yes">Yes</string>
+    <string name="value_no">No</string>
+
+    <string name="notification_running">NashiTimer is running</string>
+    <string name="notification_channel_name">NashiTimer Pomodoro</string>
 </resources>

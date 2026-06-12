@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.R
 import com.example.nashitimer.ui.components.PageTitle
 import java.time.Instant
 import java.time.LocalDate
@@ -45,15 +47,25 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            PageTitle("Insights")
+            PageTitle(stringResource(R.string.nav_insights))
         }
         item {
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard("Today", todaySessions.size.toString(), "sessions", Modifier.weight(1f))
-                StatCard("All time", totalMinutes.toString(), "minutes", Modifier.weight(1f))
+                StatCard(
+                    stringResource(R.string.stats_today),
+                    todaySessions.size.toString(),
+                    stringResource(R.string.unit_sessions),
+                    Modifier.weight(1f)
+                )
+                StatCard(
+                    stringResource(R.string.stats_all_time),
+                    totalMinutes.toString(),
+                    stringResource(R.string.unit_minutes),
+                    Modifier.weight(1f)
+                )
             }
         }
         item {
@@ -64,9 +76,12 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
             ) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Column {
-                        Text("Last 12 weeks", style = MaterialTheme.typography.titleLarge)
                         Text(
-                            "Your focus activity at a glance",
+                            stringResource(R.string.stats_last_12_weeks),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            stringResource(R.string.stats_activity_summary),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -83,9 +98,12 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
                     shape = MaterialTheme.shapes.large
                 ) {
                     Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Your story starts here", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Complete a focus session and your activity will appear here.",
+                            stringResource(R.string.stats_empty_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            stringResource(R.string.stats_empty_description),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

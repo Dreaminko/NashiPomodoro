@@ -22,9 +22,9 @@ class SettingsViewModel @Inject constructor(
         AppSettings()
     )
 
-    fun setFocus(value: Int) = update { copy(focusDurationMin = value.coerceIn(5, 90)) }
-    fun setShortBreak(value: Int) = update { copy(shortBreakMin = value.coerceIn(1, 15)) }
-    fun setLongBreak(value: Int) = update { copy(longBreakMin = value.coerceIn(10, 30)) }
+    fun setFocus(value: Int) = update { copy(focusDurationMin = value.snapToStep(5, 90, 5)) }
+    fun setShortBreak(value: Int) = update { copy(shortBreakMin = value.snapToStep(5, 15, 5)) }
+    fun setLongBreak(value: Int) = update { copy(longBreakMin = value.snapToStep(10, 30, 5)) }
     fun setInterval(value: Int) = update { copy(longBreakInterval = value.coerceIn(2, 8)) }
     fun setDailyGoal(value: Int) = update { copy(dailyGoal = value.coerceIn(1, 20)) }
     fun setTheme(value: ThemeMode) = update { copy(themeMode = value) }
@@ -36,4 +36,9 @@ class SettingsViewModel @Inject constructor(
     private fun update(block: AppSettings.() -> AppSettings) {
         viewModelScope.launch { repository.update(block) }
     }
+}
+
+internal fun Int.snapToStep(min: Int, max: Int, step: Int): Int {
+    val clamped = coerceIn(min, max)
+    return min + ((clamped - min + step / 2) / step) * step
 }

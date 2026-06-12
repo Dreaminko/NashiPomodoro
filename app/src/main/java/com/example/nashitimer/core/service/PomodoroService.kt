@@ -45,9 +45,9 @@ class PomodoroService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(time)
-            .setContentText("NashiTimer is running")
+            .setContentText(getString(R.string.notification_running))
             .setContentIntent(openIntent)
-            .addAction(0, "End", stopIntent)
+            .addAction(0, getString(R.string.action_end), stopIntent)
             .setOngoing(true)
             .setSilent(true)
             .build()
@@ -55,7 +55,11 @@ class PomodoroService : Service() {
 
     private fun createChannel() {
         val manager = getSystemService(NotificationManager::class.java)
-        val channel = NotificationChannel(CHANNEL_ID, "NashiTimer Pomodoro", NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            getString(R.string.notification_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
         manager.createNotificationChannel(channel)
     }
 

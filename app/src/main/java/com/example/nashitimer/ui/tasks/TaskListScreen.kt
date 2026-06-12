@@ -25,8 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nashitimer.R
 import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
@@ -39,9 +41,13 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Column {
-            PageTitle("Tasks")
+            PageTitle(stringResource(R.string.nav_tasks))
             Text(
-                "${tasks.count { !it.isCompleted }} open | ${tasks.count { it.isCompleted }} completed",
+                stringResource(
+                    R.string.tasks_summary,
+                    tasks.count { !it.isCompleted },
+                    tasks.count { it.isCompleted }
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -59,7 +65,7 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
                     modifier = Modifier.weight(1f),
                     value = title,
                     onValueChange = { title = it },
-                    placeholder = { Text("What needs your focus?") },
+                    placeholder = { Text(stringResource(R.string.tasks_input_placeholder)) },
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium
                 )
@@ -71,7 +77,7 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
                     enabled = title.isNotBlank(),
                     shape = MaterialTheme.shapes.medium
                 ) {
-                    Text("Add")
+                    Text(stringResource(R.string.action_add))
                 }
             }
         }
@@ -87,9 +93,12 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("A quiet list", style = MaterialTheme.typography.titleLarge)
                     Text(
-                        "Add one meaningful task and give it your next session.",
+                        stringResource(R.string.tasks_empty_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        stringResource(R.string.tasks_empty_description),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -117,13 +126,17 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
                                     else MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    "${task.pomodoroDone} of ${task.pomodoroGoal} sessions",
+                                    stringResource(
+                                        R.string.tasks_session_progress,
+                                        task.pomodoroDone,
+                                        task.pomodoroGoal
+                                    ),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                             TextButton(onClick = { viewModel.delete(task) }) {
-                                Text("Remove")
+                                Text(stringResource(R.string.action_remove))
                             }
                         }
                     }
