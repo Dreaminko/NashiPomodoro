@@ -107,7 +107,7 @@ fun TimerScreen(
             verticalAlignment = Alignment.Top
         ) {
             Column {
-                PageTitle("NashiTimer")
+                PageTitle(stringResource(R.string.nav_focus))
             }
             IconButton(
                 onClick = onOpenSettings,
