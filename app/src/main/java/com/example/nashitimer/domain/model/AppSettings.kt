@@ -25,6 +25,25 @@ data class AppSettings(
         get() = (vibrationIntensity.coerceIn(10, 100) * 255 / 100f)
             .roundToInt()
             .coerceIn(1, 255)
+
+    val shortBreakDurationMs: Long
+        get() = shortBreakMin.coerceIn(5, 15) * 60_000L
+
+    val longBreakDurationMs: Long
+        get() = longBreakMin.coerceIn(10, 30) * 60_000L
+
+    val safeLongBreakInterval: Int
+        get() = longBreakInterval.coerceIn(2, 8)
+
+    fun normalized(): AppSettings = copy(
+        focusDurationMin = focusDurationMin.coerceIn(5, 90),
+        shortBreakMin = shortBreakMin.coerceIn(5, 15),
+        longBreakMin = longBreakMin.coerceIn(10, 30),
+        longBreakInterval = safeLongBreakInterval,
+        dailyGoal = dailyGoal.coerceIn(1, 20),
+        vibrationIntensity = vibrationIntensity.coerceIn(10, 100),
+        debugFocusDurationSec = debugFocusDurationSec.coerceIn(1, 3_600)
+    )
 }
 
 enum class ThemeMode { LIGHT, DARK, FOLLOW_SYSTEM }

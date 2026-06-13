@@ -47,7 +47,16 @@ fun AppNavigation() {
                 TimerScreen(onOpenSettings = { navController.navigate(AppRoute.SETTINGS.route) })
             }
             composable(AppRoute.STATS.route) { StatsScreen() }
-            composable(AppRoute.TASKS.route) { TaskListScreen() }
+            composable(AppRoute.TASKS.route) {
+                TaskListScreen(
+                    onFocusTask = {
+                        navController.navigate(AppRoute.TIMER.route) {
+                            popUpTo(AppRoute.TIMER.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },

@@ -8,7 +8,8 @@ data class TimerState(
     val totalMs: Long = 25 * 60 * 1000L,
     val completedFocusRounds: Int = 0,
     val isRunning: Boolean = false,
-    val isFaceDown: Boolean = false
+    val isFaceDown: Boolean = false,
+    val taskId: Long? = null
 ) {
     val progress: Float
         get() = if (totalMs <= 0) 0f else 1f - (remainingMs.toFloat() / totalMs.toFloat())

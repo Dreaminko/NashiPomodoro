@@ -73,4 +73,4 @@ fun buildStatsSnapshot(
 }
 
 private fun PomodoroSession.localDate(zoneId: ZoneId): LocalDate =
-    Instant.ofEpochMilli(createdAt).atZone(zoneId).toLocalDate()
+    Instant.ofEpochMilli(startTime).atZone(zoneId).toLocalDate()

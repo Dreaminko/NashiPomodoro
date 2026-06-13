@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.roundToInt
 
 data class GlyphDebugState(
     val serviceConnected: Boolean = false,
@@ -35,8 +35,30 @@ class GlyphController @Inject constructor(
     private var sessionOpen = false
     private var pendingEffect: GlyphEffect? = null
     private var lastEffectKey: String? = null
+    private var progressAnchorRemainingMs = 0L
+    private var progressAnchorElapsedMs = 0L
+    private var progressTotalMs = 0L
+    private var lastProgressFrame: IntArray? = null
     private val _debugState = MutableStateFlow(GlyphDebugState())
     val debugState: StateFlow<GlyphDebugState> = _debugState.asStateFlow()
+    private val progressFrameRunnable = object : Runnable {
+        override fun run() {
+            if (!sessionOpen || progressTotalMs <= 0L) return
+            val elapsedMs = SystemClock.elapsedRealtime() - progressAnchorElapsedMs
+            val remainingMs = (progressAnchorRemainingMs - elapsedMs).coerceAtLeast(0L)
+            manager?.let { glyphManager ->
+                runCatching {
+                    displayFocusFrame(glyphManager, remainingMs, progressTotalMs)
+                }.onFailure {
+                    stopProgressAnimation()
+                    logFailure("updating focus progress", it)
+                }
+            }
+            if (remainingMs > 0L && progressTotalMs > 0L) {
+                handler.postDelayed(this, PROGRESS_FRAME_INTERVAL_MS)
+            }
+        }
+    }
 
     private val callback = object : GlyphManager.Callback {
         override fun onServiceConnected(componentName: ComponentName) {
@@ -72,6 +94,7 @@ class GlyphController @Inject constructor(
         }
 
         override fun onServiceDisconnected(componentName: ComponentName) {
+            stopProgressAnimation()
             sessionOpen = false
             _debugState.value = _debugState.value.copy(
                 serviceConnected = false,
@@ -83,6 +106,10 @@ class GlyphController @Inject constructor(
     }
 
     fun init() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            handler.post(::init)
+            return
+        }
         if (!adapter.supportsGlyphBar) {
             Log.i(
                 TAG,
@@ -99,6 +126,10 @@ class GlyphController @Inject constructor(
     }
 
     fun show(effect: GlyphEffect) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            handler.post { show(effect) }
+            return
+        }
         if (!adapter.supportsGlyphBar) return
         init()
         if (!sessionOpen) {
@@ -109,7 +140,12 @@ class GlyphController @Inject constructor(
     }
 
     fun release() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            handler.post(::release)
+            return
+        }
         handler.removeCallbacksAndMessages(null)
+        stopProgressAnimation()
         runCatching {
             if (sessionOpen) manager?.closeSession()
         }.onFailure { logFailure("closing Glyph session", it) }
@@ -135,28 +171,66 @@ class GlyphController @Inject constructor(
 
         runCatching {
             when (effect) {
-                GlyphEffect.Off -> glyphManager.turnOff()
-                GlyphEffect.CompleteFlash -> flashAll(glyphManager)
-                is GlyphEffect.FocusProgress -> showFocus(glyphManager, effect.remainingFraction)
-                GlyphEffect.ShortBreak -> animateBreak(glyphManager, 4_000)
-                GlyphEffect.LongBreak -> animateBreak(glyphManager, 6_000)
+                GlyphEffect.Off -> {
+                    stopProgressAnimation()
+                    glyphManager.turnOff()
+                }
+                GlyphEffect.CompleteFlash -> {
+                    stopProgressAnimation()
+                    flashAll(glyphManager)
+                }
+                is GlyphEffect.FocusProgress -> showFocus(glyphManager, effect)
+                GlyphEffect.ShortBreak -> {
+                    stopProgressAnimation()
+                    animateBreak(glyphManager, 4_000)
+                }
+                GlyphEffect.LongBreak -> {
+                    stopProgressAnimation()
+                    animateBreak(glyphManager, 6_000)
+                }
             }
         }.onFailure { logFailure("applying $effect", it) }
     }
 
-    private fun showFocus(glyphManager: GlyphManager, remainingFraction: Float) {
-        val builder = glyphManager.getGlyphFrameBuilder()
-            .buildPeriod(2_000)
-            .buildCycles(1)
-        when (adapter.profile.progressChannel) {
-            GlyphProgressChannel.A -> builder.buildChannelA()
-            GlyphProgressChannel.C -> builder.buildChannelC()
-            GlyphProgressChannel.D -> builder.buildChannelD()
-            null -> return
+    private fun showFocus(glyphManager: GlyphManager, effect: GlyphEffect.FocusProgress) {
+        stopProgressAnimation()
+        if (!effect.animate) {
+            displayFocusFrame(glyphManager, effect.remainingMs, effect.totalMs)
+            return
         }
-        val frame = builder.build()
-        val percent = (remainingFraction.coerceIn(0f, 1f) * 100).roundToInt()
-        glyphManager.displayProgressAndToggle(frame, percent, false)
+
+        progressAnchorRemainingMs = effect.remainingMs.coerceIn(0L, effect.totalMs)
+        progressAnchorElapsedMs = SystemClock.elapsedRealtime()
+        progressTotalMs = effect.totalMs.coerceAtLeast(0L)
+        progressFrameRunnable.run()
+    }
+
+    private fun displayFocusFrame(
+        glyphManager: GlyphManager,
+        remainingMs: Long,
+        totalMs: Long
+    ) {
+        val ledIndices = adapter.profile.progressLedIndices
+        if (ledIndices.isEmpty() || totalMs <= 0L) return
+
+        val brightness = GlyphProgressBrightness.calculate(
+            remainingFraction = (remainingMs.toDouble() / totalMs).toFloat(),
+            ledCount = ledIndices.size
+        )
+        if (lastProgressFrame?.contentEquals(brightness) == true) return
+        lastProgressFrame = brightness
+
+        val builder = glyphManager.getGlyphFrameBuilder()
+        ledIndices.forEachIndexed { position, channelIndex ->
+            builder.buildChannel(channelIndex, brightness[position])
+        }
+        glyphManager.setFrameColors(builder.build().channel)
+    }
+
+    private fun stopProgressAnimation() {
+        handler.removeCallbacks(progressFrameRunnable)
+        progressTotalMs = 0L
+        lastProgressFrame = null
     }
 
     private fun animateBreak(glyphManager: GlyphManager, periodMs: Int) {
@@ -190,8 +264,9 @@ class GlyphController @Inject constructor(
             .buildChannelE()
 
     private fun effectKey(effect: GlyphEffect): String = when (effect) {
-        is GlyphEffect.FocusProgress ->
-            "focus:${(effect.remainingFraction.coerceIn(0f, 1f) * 100).roundToInt()}"
+        is GlyphEffect.FocusProgress -> {
+            "focus:${effect.remainingMs}:${effect.totalMs}:${effect.animate}"
+        }
         GlyphEffect.ShortBreak -> "short-break"
         GlyphEffect.LongBreak -> "long-break"
         GlyphEffect.CompleteFlash -> "complete:${System.nanoTime()}"
@@ -210,5 +285,6 @@ class GlyphController @Inject constructor(
 
     private companion object {
         const val TAG = "GlyphController"
+        const val PROGRESS_FRAME_INTERVAL_MS = 50L
     }
 }

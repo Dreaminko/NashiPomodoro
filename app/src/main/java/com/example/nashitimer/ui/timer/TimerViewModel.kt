@@ -1,151 +1,42 @@
 package com.example.nashitimer.ui.timer
 
-import android.content.Context
-import android.content.Intent
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nashitimer.core.glyph.GlyphController
-import com.example.nashitimer.core.glyph.GlyphEffect
-import com.example.nashitimer.core.haptics.VibrationController
 import com.example.nashitimer.core.sensor.FlipDetector
-import com.example.nashitimer.core.service.PomodoroService
-import com.example.nashitimer.core.timer.TimerEngine
-import com.example.nashitimer.core.timer.TimerState
-import com.example.nashitimer.data.repository.HistoryRepository
-import com.example.nashitimer.data.repository.SettingsRepository
-import com.example.nashitimer.domain.model.AppSettings
-import com.example.nashitimer.domain.model.PomodoroSession
-import com.example.nashitimer.domain.model.TimerPhase
+import com.example.nashitimer.core.timer.TimerRuntime
+import com.example.nashitimer.core.timer.TimerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TimerUiState(
-    val timer: TimerState = TimerState(),
-    val settings: AppSettings = AppSettings()
-)
-
 @HiltViewModel
 class TimerViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
-    private val engine: TimerEngine,
-    private val flipDetector: FlipDetector,
-    private val settingsRepository: SettingsRepository,
-    private val historyRepository: HistoryRepository,
-    private val glyphController: GlyphController,
-    private val vibrationController: VibrationController
+    private val runtime: TimerRuntime,
+    private val flipDetector: FlipDetector
 ) : ViewModel() {
-    private val settings = settingsRepository.settings.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        AppSettings()
-    )
-
-    val uiState: StateFlow<TimerUiState> = combine(engine.state, settings) { timer, appSettings ->
-        TimerUiState(timer, appSettings)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, TimerUiState())
-
-    private val lastRound = MutableStateFlow(0)
+    val uiState: StateFlow<TimerUiState> = runtime.uiState
 
     init {
-        glyphController.init()
         observeFlips()
-        observeCompletion()
-        observeServiceAndGlyph()
     }
 
-    fun toggleManual() {
-        val current = engine.state.value
-        if (current.isRunning) engine.pause() else engine.resume(settings.value)
-    }
+    fun toggleManual() = runtime.toggle()
 
-    fun end() {
-        engine.stop(settings.value)
-        glyphController.show(GlyphEffect.Off)
-        context.stopService(Intent(context, PomodoroService::class.java))
-    }
+    fun end() = runtime.end()
 
-    fun skip() {
-        engine.skip(settings.value)
-    }
+    fun skip() = runtime.skip()
 
     private fun observeFlips() {
         viewModelScope.launch {
             flipDetector.faceDownEvents().distinctUntilChanged().collect { faceDown ->
-                engine.setFaceDown(faceDown)
+                runtime.setFaceDown(faceDown)
                 when {
-                    faceDown -> engine.resume(settings.value)
-                    engine.state.value.isRunning -> engine.pause()
+                    faceDown -> runtime.resume()
+                    runtime.uiState.value.timer.isRunning -> runtime.pause()
                 }
             }
         }
-    }
-
-    private fun observeCompletion() {
-        viewModelScope.launch {
-            engine.state.collect { state ->
-                if (state.completedFocusRounds > lastRound.value) {
-                    lastRound.value = state.completedFocusRounds
-                    val now = System.currentTimeMillis()
-                    val focusDurationMs = settings.value.focusDurationMs
-                    historyRepository.add(
-                        PomodoroSession(
-                            startTime = now - focusDurationMs,
-                            endTime = now,
-                            phase = TimerPhase.FOCUS.name,
-                            durationMs = focusDurationMs,
-                            completed = true,
-                            tag = "Focus",
-                            createdAt = now
-                        )
-                    )
-                    glyphController.show(GlyphEffect.CompleteFlash)
-                    vibrateIfEnabled()
-                }
-            }
-        }
-    }
-
-    private fun observeServiceAndGlyph() {
-        viewModelScope.launch {
-            engine.state.collect { state ->
-                if (state.isRunning) {
-                    val serviceIntent = Intent(context, PomodoroService::class.java)
-                        .putExtra(PomodoroService.EXTRA_TIME, state.timeText)
-                        .putExtra(PomodoroService.EXTRA_REMAINING_MS, state.remainingMs)
-                        .putExtra(PomodoroService.EXTRA_TOTAL_MS, state.totalMs)
-                        .putExtra(
-                            PomodoroService.EXTRA_FOCUS_DURATION_MS,
-                            settings.value.focusDurationMs
-                        )
-                    ContextCompat.startForegroundService(context, serviceIntent)
-                }
-                when {
-                    !state.isRunning -> glyphController.show(GlyphEffect.Off)
-                    state.phase == TimerPhase.FOCUS ->
-                        glyphController.show(GlyphEffect.FocusProgress(state.remainingFraction))
-                    state.phase == TimerPhase.SHORT_BREAK -> glyphController.show(GlyphEffect.ShortBreak)
-                    state.phase == TimerPhase.LONG_BREAK -> glyphController.show(GlyphEffect.LongBreak)
-                }
-            }
-        }
-    }
-
-    private fun vibrateIfEnabled() {
-        val currentSettings = settings.value
-        if (!currentSettings.vibrationEnabled) return
-        vibrationController.notifyTimerCompletion(currentSettings.vibrationAmplitude)
-    }
-
-    override fun onCleared() {
-        glyphController.release()
     }
 }

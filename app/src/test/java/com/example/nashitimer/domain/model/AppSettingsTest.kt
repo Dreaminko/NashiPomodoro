@@ -49,4 +49,25 @@ class AppSettingsTest {
         assertEquals(26, AppSettings(vibrationIntensity = -1).vibrationAmplitude)
         assertEquals(255, AppSettings(vibrationIntensity = 999).vibrationAmplitude)
     }
+
+    @Test
+    fun normalized_clampsEveryPersistedNumericSetting() {
+        val normalized = AppSettings(
+            focusDurationMin = -1,
+            shortBreakMin = 0,
+            longBreakMin = 999,
+            longBreakInterval = 0,
+            dailyGoal = 999,
+            vibrationIntensity = 0,
+            debugFocusDurationSec = 99_999
+        ).normalized()
+
+        assertEquals(5, normalized.focusDurationMin)
+        assertEquals(5, normalized.shortBreakMin)
+        assertEquals(30, normalized.longBreakMin)
+        assertEquals(2, normalized.longBreakInterval)
+        assertEquals(20, normalized.dailyGoal)
+        assertEquals(10, normalized.vibrationIntensity)
+        assertEquals(3_600, normalized.debugFocusDurationSec)
+    }
 }

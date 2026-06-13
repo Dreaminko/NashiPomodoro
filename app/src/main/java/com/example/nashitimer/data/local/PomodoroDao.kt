@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.nashitimer.domain.model.PomodoroSession
 import com.example.nashitimer.domain.model.TaskItem
@@ -12,11 +13,28 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PomodoroDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSession(session: PomodoroSession)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSession(session: PomodoroSession): Long
 
-    @Query("SELECT * FROM pomodoro_sessions WHERE createdAt >= :since ORDER BY createdAt DESC")
-    fun sessionsSince(since: Long): Flow<List<PomodoroSession>>
+    @Query(
+        """
+        UPDATE tasks
+        SET pomodoroDone = pomodoroDone + 1,
+            isCompleted = CASE
+                WHEN pomodoroDone + 1 >= pomodoroGoal THEN 1
+                ELSE isCompleted
+            END
+        WHERE id = :taskId
+        """
+    )
+    suspend fun incrementTaskProgress(taskId: Long)
+
+    @Transaction
+    suspend fun insertSessionAndUpdateTask(session: PomodoroSession): Boolean {
+        if (insertSession(session) == -1L) return false
+        session.taskId?.let { incrementTaskProgress(it) }
+        return true
+    }
 
     @Query("SELECT * FROM pomodoro_sessions ORDER BY createdAt DESC")
     fun allSessions(): Flow<List<PomodoroSession>>

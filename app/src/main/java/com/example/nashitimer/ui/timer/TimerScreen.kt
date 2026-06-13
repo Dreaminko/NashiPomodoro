@@ -121,6 +121,17 @@ fun TimerScreen(
             }
         }
 
+        uiState.activeTask?.let { task ->
+            Text(
+                text = stringResource(R.string.timer_active_task, task.title),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         Spacer(Modifier.weight(0.6f))
 
         Box(contentAlignment = Alignment.Center) {

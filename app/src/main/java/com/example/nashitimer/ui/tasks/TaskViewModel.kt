@@ -2,6 +2,7 @@ package com.example.nashitimer.ui.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nashitimer.core.timer.TimerRuntime
 import com.example.nashitimer.data.repository.TaskRepository
 import com.example.nashitimer.domain.model.TaskItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +28,8 @@ internal fun List<TaskItem>.filteredBy(filter: TaskFilter): List<TaskItem> = whe
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
-    private val repository: TaskRepository
+    private val repository: TaskRepository,
+    private val timerRuntime: TimerRuntime
 ) : ViewModel() {
     val tasks: StateFlow<List<TaskItem>> = repository.tasks.stateIn(
         viewModelScope,
@@ -54,12 +56,14 @@ class TaskViewModel @Inject constructor(
     fun update(task: TaskItem, title: String, description: String, pomodoroGoal: Int) {
         val normalizedTitle = title.trim()
         if (normalizedTitle.isEmpty()) return
+        val normalizedGoal = pomodoroGoal.coerceIn(1, 99)
         viewModelScope.launch {
             repository.update(
                 task.copy(
                     title = normalizedTitle,
                     description = description.trim().ifEmpty { null },
-                    pomodoroGoal = pomodoroGoal.coerceIn(1, 99)
+                    pomodoroGoal = normalizedGoal,
+                    isCompleted = task.isCompleted || task.pomodoroDone >= normalizedGoal
                 )
             )
         }
@@ -71,5 +75,9 @@ class TaskViewModel @Inject constructor(
 
     fun clearCompleted() {
         viewModelScope.launch { repository.clearCompleted() }
+    }
+
+    fun selectForFocus(task: TaskItem) {
+        if (!task.isCompleted) timerRuntime.selectTask(task.id)
     }
 }

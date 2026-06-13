@@ -32,22 +32,34 @@
     <string name="timer_long_press_skip">長押しして現在のフェーズをスキップ</string>
     <string name="timer_skip_current_phase">現在のフェーズをスキップ</string>
     <string name="timer_round_summary">%1$d セット目  |  %2$d セットごとに長い休憩</string>
+    <string name="timer_active_task">集中対象：%1$s</string>
 
-    <string name="tasks_summary">未完了 %1$d 件 | 完了 %2$d 件</string>
+    <string name="tasks_summary">%1$s | %2$s</string>
+    <plurals name="tasks_open_count">
+        <item quantity="other">未完了 %1$d 件</item>
+    </plurals>
+    <plurals name="tasks_completed_count">
+        <item quantity="other">完了 %1$d 件</item>
+    </plurals>
     <string name="tasks_input_placeholder">次に集中することは？</string>
     <string name="tasks_empty_title">静かなタスクリスト</string>
     <string name="tasks_empty_description">大切なタスクを1つ追加して、次の集中時間を使いましょう。</string>
-    <string name="tasks_session_progress">%2$d セッション中 %1$d セッション完了</string>
+    <plurals name="tasks_session_progress">
+        <item quantity="other">%2$d セッション中 %1$d セッション完了</item>
+    </plurals>
     <string name="task_detail_title">タスクの詳細</string>
     <string name="tasks_filter_all">すべて</string>
     <string name="tasks_filter_open">未完了</string>
     <string name="tasks_filter_completed">完了</string>
     <string name="tasks_filter_empty">この表示にはタスクがありません</string>
     <string name="tasks_edit">タスクを編集</string>
+    <string name="tasks_focus">%1$s に集中</string>
     <string name="tasks_title">タイトル</string>
     <string name="tasks_description">メモ</string>
     <string name="tasks_goal">集中目標</string>
-    <string name="tasks_goal_rounds">%1$d セッション</string>
+    <plurals name="tasks_goal_rounds">
+        <item quantity="other">%1$d セッション</item>
+    </plurals>
     <string name="tasks_decrease_goal">集中目標を減らす</string>
     <string name="tasks_increase_goal">集中目標を増やす</string>
     <string name="tasks_clear_completed">完了済みを削除</string>
@@ -73,7 +85,6 @@
     <string name="stats_duration_hours_minutes">%1$d時間%2$d分</string>
     <string name="stats_duration_minutes">%1$d分</string>
     <string name="unit_sessions">セッション</string>
-    <string name="unit_minutes">分</string>
     <string name="stats_last_12_weeks">過去12週間</string>
     <string name="stats_activity_summary">集中の記録をひと目で確認</string>
     <string name="stats_empty_title">記録はここから始まります</string>
@@ -107,7 +118,6 @@
     <string name="unit_min">分</string>
     <string name="unit_rounds">セット</string>
     <string name="settings_appearance_section">外観</string>
-    <string name="settings_appearance_section_description">NashiTimer の表示と読みやすさを設定</string>
     <string name="settings_theme">テーマ</string>
     <string name="settings_theme_description">ライト、ダーク、またはシステムに合わせた外観</string>
     <string name="theme_light">ライト</string>
@@ -116,9 +126,6 @@
     <string name="settings_language">言語</string>
     <string name="settings_language_description">アプリ全体で使用する言語を変更</string>
     <string name="language_system">システムに合わせる</string>
-    <string name="settings_feedback_section">フィードバック</string>
-    <string name="settings_other_section">通知と詳細設定</string>
-    <string name="settings_other_section_description">セッション完了時の通知とテスト機能</string>
     <string name="settings_completion_vibration">完了時に振動</string>
     <string name="settings_completion_vibration_description">セッション終了時にやさしく振動します</string>
     <string name="settings_vibration_intensity">振動の強さ</string>
@@ -127,10 +134,7 @@
     <string name="settings_completion_section">セッション完了</string>
     <string name="settings_completion_section_description">NashiTimer からの通知方法を選択</string>
     <string name="settings_developer_section">開発者向け</string>
-    <string name="settings_debug">デバッグ</string>
-    <string name="settings_debug_enabled">有効 · 集中時間 %1$d 秒</string>
     <string name="settings_debug_description">デバイス診断とテスト操作</string>
-    <string name="settings_open_debug">デバッグ設定を開く</string>
 
     <string name="debug_title">デバッグ</string>
     <string name="debug_mode">デバッグモード</string>

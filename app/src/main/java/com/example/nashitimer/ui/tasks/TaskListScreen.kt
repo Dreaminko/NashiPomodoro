@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
@@ -48,10 +50,14 @@ import com.example.nashitimer.domain.model.TaskItem
 import com.example.nashitimer.ui.components.PageTitle
 
 @Composable
-fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
+fun TaskListScreen(
+    onFocusTask: () -> Unit,
+    viewModel: TaskViewModel = hiltViewModel()
+) {
     val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val visibleTasks = remember(tasks, filter) { tasks.filteredBy(filter) }
+    val openCount = tasks.count { !it.isCompleted }
     val completedCount = tasks.count(TaskItem::isCompleted)
     var title by remember { mutableStateOf("") }
     var editingTask by remember { mutableStateOf<TaskItem?>(null) }
@@ -74,8 +80,16 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
             Text(
                 stringResource(
                     R.string.tasks_summary,
-                    tasks.count { !it.isCompleted },
-                    completedCount
+                    pluralStringResource(
+                        R.plurals.tasks_open_count,
+                        openCount,
+                        openCount
+                    ),
+                    pluralStringResource(
+                        R.plurals.tasks_completed_count,
+                        completedCount,
+                        completedCount
+                    )
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -135,6 +149,10 @@ fun TaskListScreen(viewModel: TaskViewModel = hiltViewModel()) {
                     TaskCard(
                         task = task,
                         onToggle = { viewModel.toggle(task) },
+                        onFocus = {
+                            viewModel.selectForFocus(task)
+                            onFocusTask()
+                        },
                         onEdit = { editingTask = task },
                         onDelete = { viewModel.delete(task) }
                     )
@@ -218,6 +236,7 @@ private fun EmptyTaskState(hasTasks: Boolean, modifier: Modifier = Modifier) {
 private fun TaskCard(
     task: TaskItem,
     onToggle: () -> Unit,
+    onFocus: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -269,14 +288,23 @@ private fun TaskCard(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    stringResource(
-                        R.string.tasks_session_progress,
+                    pluralStringResource(
+                        R.plurals.tasks_session_progress,
+                        task.pomodoroGoal,
                         task.pomodoroDone,
                         task.pomodoroGoal
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
+            }
+            if (!task.isCompleted) {
+                IconButton(onClick = onFocus) {
+                    Icon(
+                        Icons.Rounded.PlayArrow,
+                        contentDescription = stringResource(R.string.tasks_focus, task.title)
+                    )
+                }
             }
             IconButton(onClick = onEdit) {
                 Icon(
@@ -342,7 +370,7 @@ private fun EditTaskDialog(
                         )
                     }
                     Text(
-                        stringResource(R.string.tasks_goal_rounds, goal),
+                        pluralStringResource(R.plurals.tasks_goal_rounds, goal, goal),
                         style = MaterialTheme.typography.titleMedium
                     )
                     IconButton(

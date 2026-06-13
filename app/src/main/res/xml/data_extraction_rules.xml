@@ -5,15 +5,15 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="sharedpref" path="active_timer_session.xml" />
+        <exclude domain="sharedpref" path="selected_focus_task.xml" />
         <!-- TODO: Use <include> and <exclude> to control what is backed up.
         <include .../>
         <exclude .../>
         -->
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="active_timer_session.xml" />
+        <exclude domain="sharedpref" path="selected_focus_task.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>

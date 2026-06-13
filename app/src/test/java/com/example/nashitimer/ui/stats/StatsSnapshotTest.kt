@@ -35,6 +35,25 @@ class StatsSnapshotTest {
         assertEquals(2, result.heatmapCounts.last())
     }
 
+    @Test
+    fun crossMidnightSession_isAttributedToItsStartDate() {
+        val start = today.minusDays(1).atTime(23, 50)
+            .atZone(zoneId).toInstant().toEpochMilli()
+        val session = PomodoroSession(
+            startTime = start,
+            endTime = start + 25 * 60_000L,
+            phase = TimerPhase.FOCUS.name,
+            durationMs = 25 * 60_000L,
+            completed = true,
+            createdAt = start + 25 * 60_000L
+        )
+
+        val result = buildStatsSnapshot(listOf(session), today, zoneId)
+
+        assertEquals(0L, result.todayFocusMs)
+        assertEquals(25 * 60_000L, result.week[result.week.lastIndex - 1].durationMs)
+    }
+
     private fun session(
         date: LocalDate,
         hour: Int,

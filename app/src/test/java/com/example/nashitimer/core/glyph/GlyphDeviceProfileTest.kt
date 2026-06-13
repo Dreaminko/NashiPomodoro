@@ -24,6 +24,7 @@ class GlyphDeviceProfileTest {
 
         assertEquals(GlyphDeviceProfile.DEVICE_24111_PRO, profile)
         assertEquals("A059", profile.sdkFamilyCode)
+        assertEquals((0..19).toList(), profile.progressLedIndices)
     }
 
     @Test
@@ -41,6 +42,7 @@ class GlyphDeviceProfileTest {
         val profile = GlyphDeviceProfile.fromModel(model)
         assertEquals(expectedProfile, profile)
         assertEquals(expectedChannel, profile.progressChannel)
+        assertTrue(profile.progressLedIndices.isNotEmpty())
         assertTrue(profile.supportsGlyphBar)
     }
 }
