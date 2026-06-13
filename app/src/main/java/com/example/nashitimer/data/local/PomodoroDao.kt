@@ -30,6 +30,9 @@ interface PomodoroDao {
     @Delete
     suspend fun deleteTask(task: TaskItem)
 
+    @Query("DELETE FROM tasks WHERE isCompleted = 1")
+    suspend fun deleteCompletedTasks()
+
     @Query("SELECT * FROM tasks ORDER BY isCompleted ASC, createdAt DESC")
     fun tasks(): Flow<List<TaskItem>>
 }

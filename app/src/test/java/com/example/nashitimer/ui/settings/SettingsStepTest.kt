@@ -16,4 +16,11 @@ class SettingsStepTest {
         assertEquals(5, 1.snapToStep(5, 15, 5))
         assertEquals(15, 30.snapToStep(5, 15, 5))
     }
+
+    @Test
+    fun snapToStep_supportsVibrationIntensitySteps() {
+        assertEquals(10, 1.snapToStep(10, 100, 10))
+        assertEquals(60, 56.snapToStep(10, 100, 10))
+        assertEquals(100, 105.snapToStep(10, 100, 10))
+    }
 }

@@ -2,6 +2,7 @@ package com.example.nashitimer.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nashitimer.core.haptics.VibrationController
 import com.example.nashitimer.data.repository.SettingsRepository
 import com.example.nashitimer.domain.model.AppSettings
 import com.example.nashitimer.domain.model.ThemeMode
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val vibrationController: VibrationController,
     private val repository: SettingsRepository
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> = repository.settings.stateIn(
@@ -29,6 +31,16 @@ class SettingsViewModel @Inject constructor(
     fun setDailyGoal(value: Int) = update { copy(dailyGoal = value.coerceIn(1, 20)) }
     fun setTheme(value: ThemeMode) = update { copy(themeMode = value) }
     fun setVibration(value: Boolean) = update { copy(vibrationEnabled = value) }
+    fun setVibrationIntensity(value: Int) =
+        update { copy(vibrationIntensity = value.snapToStep(10, 100, 10)) }
+
+    fun previewVibrationIntensity(value: Int) {
+        val intensity = value.snapToStep(10, 100, 10)
+        vibrationController.previewIntensity(
+            AppSettings(vibrationIntensity = intensity).vibrationAmplitude
+        )
+    }
+
     fun setDebugMode(value: Boolean) = update { copy(debugModeEnabled = value) }
     fun setDebugFocusDurationSeconds(value: Int) =
         update { copy(debugFocusDurationSec = value.coerceIn(1, 3_600)) }

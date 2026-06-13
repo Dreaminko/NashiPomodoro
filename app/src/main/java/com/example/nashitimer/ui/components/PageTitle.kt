@@ -13,8 +13,8 @@ import com.example.nashitimer.ui.theme.NotoSerifJapanese
 @Composable
 fun PageTitle(
     text: String,
-    color: Color = Color.Unspecified,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified
 ) {
     val titleFontFamily =
         if (LocalConfiguration.current.locales[0].language == "ja") {

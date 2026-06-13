@@ -2,8 +2,6 @@ package com.example.nashitimer.core.timer
 
 import com.example.nashitimer.domain.model.AppSettings
 import com.example.nashitimer.domain.model.TimerPhase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -20,29 +18,40 @@ class TimerEngineTest {
     @Test
     fun skipFocus_movesToBreakWithoutCompletingRound() {
         val engine = TimerEngine()
-        val scope = CoroutineScope(Job())
 
-        engine.start(scope, settings)
-        engine.skip(scope, settings)
+        engine.start(settings)
+        engine.skip(settings)
 
         assertEquals(TimerPhase.SHORT_BREAK, engine.state.value.phase)
         assertEquals(0, engine.state.value.completedFocusRounds)
         assertTrue(engine.state.value.isRunning)
-        scope.coroutineContext[Job]?.cancel()
+        engine.stop(settings)
     }
 
     @Test
     fun skipBreak_movesToFocusAndKeepsPausedState() {
         val engine = TimerEngine()
-        val scope = CoroutineScope(Job())
 
-        engine.start(scope, settings)
-        engine.skip(scope, settings)
+        engine.start(settings)
+        engine.skip(settings)
         engine.pause()
-        engine.skip(scope, settings)
+        engine.skip(settings)
 
         assertEquals(TimerPhase.FOCUS, engine.state.value.phase)
         assertFalse(engine.state.value.isRunning)
-        scope.coroutineContext[Job]?.cancel()
+        engine.stop(settings)
+    }
+
+    @Test
+    fun stopWithDuration_resetsToIdleUsingProvidedDuration() {
+        val engine = TimerEngine()
+
+        engine.start(settings)
+        engine.stop(30_000L)
+
+        assertEquals(TimerPhase.IDLE, engine.state.value.phase)
+        assertEquals(30_000L, engine.state.value.remainingMs)
+        assertEquals(30_000L, engine.state.value.totalMs)
+        assertFalse(engine.state.value.isRunning)
     }
 }

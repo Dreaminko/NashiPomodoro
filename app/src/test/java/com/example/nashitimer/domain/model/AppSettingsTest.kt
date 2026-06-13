@@ -36,4 +36,17 @@ class AppSettingsTest {
             AppSettings(debugModeEnabled = true, debugFocusDurationSec = 9_999).focusDurationMs
         )
     }
+
+    @Test
+    fun vibrationAmplitude_mapsPercentageToAndroidRange() {
+        assertEquals(26, AppSettings(vibrationIntensity = 10).vibrationAmplitude)
+        assertEquals(153, AppSettings(vibrationIntensity = 60).vibrationAmplitude)
+        assertEquals(255, AppSettings(vibrationIntensity = 100).vibrationAmplitude)
+    }
+
+    @Test
+    fun vibrationAmplitude_clampsStoredIntensity() {
+        assertEquals(26, AppSettings(vibrationIntensity = -1).vibrationAmplitude)
+        assertEquals(255, AppSettings(vibrationIntensity = 999).vibrationAmplitude)
+    }
 }

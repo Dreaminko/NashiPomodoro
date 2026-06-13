@@ -8,6 +8,8 @@
     <string name="action_back">返回</string>
     <string name="action_add">添加</string>
     <string name="action_remove">删除</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_save">保存</string>
     <string name="action_end">结束</string>
     <string name="action_apply_test_duration">应用测试时长</string>
     <string name="action_off">关闭</string>
@@ -37,6 +39,19 @@
     <string name="tasks_empty_description">添加一项重要任务，把下一轮专注留给它。</string>
     <string name="tasks_session_progress">已完成 %1$d / %2$d 轮</string>
     <string name="task_detail_title">任务详情</string>
+    <string name="tasks_filter_all">全部</string>
+    <string name="tasks_filter_open">待办</string>
+    <string name="tasks_filter_completed">已完成</string>
+    <string name="tasks_filter_empty">此分类下没有任务</string>
+    <string name="tasks_edit">编辑任务</string>
+    <string name="tasks_title">标题</string>
+    <string name="tasks_description">备注</string>
+    <string name="tasks_goal">专注目标</string>
+    <string name="tasks_goal_rounds">%1$d 轮</string>
+    <string name="tasks_decrease_goal">减少专注目标</string>
+    <string name="tasks_increase_goal">增加专注目标</string>
+    <string name="tasks_clear_completed">清理已完成</string>
+    <string name="tasks_clear_completed_confirmation">删除所有已完成任务？此操作无法撤销。</string>
 
     <string name="stats_today">今天</string>
     <string name="stats_all_time">累计</string>
@@ -101,14 +116,14 @@
     <string name="settings_language">语言</string>
     <string name="settings_language_description">更改应用内使用的语言</string>
     <string name="language_system">跟随系统</string>
-    <string name="language_english">英语</string>
-    <string name="language_simplified_chinese">简体中文</string>
-    <string name="language_japanese">日语</string>
     <string name="settings_feedback_section">反馈</string>
     <string name="settings_other_section">提醒与高级选项</string>
     <string name="settings_other_section_description">设置完成提醒和测试工具</string>
     <string name="settings_completion_vibration">完成时振动</string>
     <string name="settings_completion_vibration_description">每轮结束时以轻柔振动提醒</string>
+    <string name="settings_vibration_intensity">振动强度</string>
+    <string name="settings_vibration_intensity_description">调整完成提醒的振动强弱</string>
+    <string name="unit_percent">%</string>
     <string name="settings_completion_section">完成提醒</string>
     <string name="settings_completion_section_description">选择 NashiTimer 提醒你的方式</string>
     <string name="settings_developer_section">开发者</string>

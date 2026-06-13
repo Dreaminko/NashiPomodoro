@@ -2,14 +2,12 @@ package com.example.nashitimer.ui.timer
 
 import android.content.Context
 import android.content.Intent
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nashitimer.core.glyph.GlyphController
 import com.example.nashitimer.core.glyph.GlyphEffect
+import com.example.nashitimer.core.haptics.VibrationController
 import com.example.nashitimer.core.sensor.FlipDetector
 import com.example.nashitimer.core.service.PomodoroService
 import com.example.nashitimer.core.timer.TimerEngine
@@ -37,12 +35,13 @@ data class TimerUiState(
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val engine: TimerEngine,
     private val flipDetector: FlipDetector,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: HistoryRepository,
-    private val glyphController: GlyphController
+    private val glyphController: GlyphController,
+    private val vibrationController: VibrationController
 ) : ViewModel() {
     private val settings = settingsRepository.settings.stateIn(
         viewModelScope,
@@ -65,7 +64,7 @@ class TimerViewModel @Inject constructor(
 
     fun toggleManual() {
         val current = engine.state.value
-        if (current.isRunning) engine.pause() else engine.resume(viewModelScope, settings.value)
+        if (current.isRunning) engine.pause() else engine.resume(settings.value)
     }
 
     fun end() {
@@ -75,7 +74,7 @@ class TimerViewModel @Inject constructor(
     }
 
     fun skip() {
-        engine.skip(viewModelScope, settings.value)
+        engine.skip(settings.value)
     }
 
     private fun observeFlips() {
@@ -83,7 +82,7 @@ class TimerViewModel @Inject constructor(
             flipDetector.faceDownEvents().distinctUntilChanged().collect { faceDown ->
                 engine.setFaceDown(faceDown)
                 when {
-                    faceDown -> engine.resume(viewModelScope, settings.value)
+                    faceDown -> engine.resume(settings.value)
                     engine.state.value.isRunning -> engine.pause()
                 }
             }
@@ -123,6 +122,10 @@ class TimerViewModel @Inject constructor(
                         .putExtra(PomodoroService.EXTRA_TIME, state.timeText)
                         .putExtra(PomodoroService.EXTRA_REMAINING_MS, state.remainingMs)
                         .putExtra(PomodoroService.EXTRA_TOTAL_MS, state.totalMs)
+                        .putExtra(
+                            PomodoroService.EXTRA_FOCUS_DURATION_MS,
+                            settings.value.focusDurationMs
+                        )
                     ContextCompat.startForegroundService(context, serviceIntent)
                 }
                 when {
@@ -137,14 +140,9 @@ class TimerViewModel @Inject constructor(
     }
 
     private fun vibrateIfEnabled() {
-        if (!settings.value.vibrationEnabled) return
-        val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            context.getSystemService(VibratorManager::class.java).defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Vibrator::class.java)
-        }
-        vibrator.vibrate(VibrationEffect.createOneShot(220, VibrationEffect.DEFAULT_AMPLITUDE))
+        val currentSettings = settings.value
+        if (!currentSettings.vibrationEnabled) return
+        vibrationController.notifyTimerCompletion(currentSettings.vibrationAmplitude)
     }
 
     override fun onCleared() {

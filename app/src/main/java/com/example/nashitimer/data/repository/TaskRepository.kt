@@ -14,4 +14,5 @@ class TaskRepository @Inject constructor(
     suspend fun add(title: String) = dao.upsertTask(TaskItem(title = title, createdAt = System.currentTimeMillis()))
     suspend fun update(task: TaskItem) = dao.updateTask(task)
     suspend fun delete(task: TaskItem) = dao.deleteTask(task)
+    suspend fun clearCompleted() = dao.deleteCompletedTasks()
 }

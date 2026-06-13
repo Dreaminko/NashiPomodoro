@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 class FlipDetector @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     fun faceDownEvents(): Flow<Boolean> = callbackFlow {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

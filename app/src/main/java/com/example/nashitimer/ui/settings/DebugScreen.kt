@@ -22,7 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.R
 import com.example.nashitimer.ui.components.NashiSwitch
 import com.example.nashitimer.ui.components.PageTitle
@@ -42,7 +42,7 @@ fun DebugScreen(
     onBack: () -> Unit,
     viewModel: DebugViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var durationText by remember { mutableStateOf(state.settings.debugFocusDurationSec.toString()) }
 
     LaunchedEffect(state.settings.debugFocusDurationSec) {

@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.R
 import com.example.nashitimer.ui.components.PageTitle
 import java.time.format.TextStyle
@@ -46,7 +46,7 @@ private enum class TrendPeriod { WEEK, MONTH }
 
 @Composable
 fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
-    val stats by viewModel.stats.collectAsState()
+    val stats by viewModel.stats.collectAsStateWithLifecycle()
     var trendPeriod by remember { mutableStateOf(TrendPeriod.WEEK) }
     val trend = if (trendPeriod == TrendPeriod.WEEK) stats.week else stats.month
     val average = if (trendPeriod == TrendPeriod.WEEK) {

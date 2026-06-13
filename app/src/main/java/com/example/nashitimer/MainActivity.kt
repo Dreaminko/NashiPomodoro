@@ -2,18 +2,17 @@ package com.example.nashitimer
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.domain.model.ThemeMode
 import com.example.nashitimer.ui.navigation.AppNavigation
 import com.example.nashitimer.ui.settings.SettingsViewModel
@@ -32,7 +31,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
-            val settings by settingsViewModel.settings.collectAsState()
+            val settings by settingsViewModel.settings.collectAsStateWithLifecycle()
             val systemDark = isSystemInDarkTheme()
             val darkTheme = when (settings.themeMode) {
                 ThemeMode.LIGHT -> false
@@ -51,7 +50,6 @@ class MainActivity : ComponentActivity() {
 
     private fun requestNotificationPermission() {
         if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS

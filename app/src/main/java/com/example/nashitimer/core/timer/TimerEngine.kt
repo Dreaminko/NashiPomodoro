@@ -3,7 +3,9 @@ package com.example.nashitimer.core.timer
 import com.example.nashitimer.domain.model.AppSettings
 import com.example.nashitimer.domain.model.TimerPhase
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +18,12 @@ import javax.inject.Singleton
 class TimerEngine @Inject constructor() {
     private val _state = MutableStateFlow(TimerState())
     val state: StateFlow<TimerState> = _state.asStateFlow()
+    private val tickerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ticker: Job? = null
     private var pausedPhase = TimerPhase.FOCUS
+    private var deadlineNanos = 0L
 
-    fun start(scope: CoroutineScope, settings: AppSettings, phase: TimerPhase = TimerPhase.FOCUS) {
+    fun start(settings: AppSettings, phase: TimerPhase = TimerPhase.FOCUS) {
         val duration = durationFor(phase, settings)
         _state.value = _state.value.copy(
             phase = phase,
@@ -27,32 +31,42 @@ class TimerEngine @Inject constructor() {
             totalMs = duration,
             isRunning = true
         )
-        runTicker(scope, settings)
+        runTicker(settings)
     }
 
-    fun resume(scope: CoroutineScope, settings: AppSettings) {
+    fun resume(settings: AppSettings) {
         if (_state.value.phase == TimerPhase.IDLE) {
-            start(scope, settings)
+            start(settings)
         } else {
             _state.value = _state.value.copy(isRunning = true, phase = activePhase())
-            runTicker(scope, settings)
+            runTicker(settings)
         }
     }
 
     fun pause() {
+        if (!_state.value.isRunning) return
+        val remainingMs = remainingUntilDeadline()
         ticker?.cancel()
         pausedPhase = _state.value.phase
-        _state.value = _state.value.copy(isRunning = false, phase = TimerPhase.PAUSED)
+        _state.value = _state.value.copy(
+            remainingMs = remainingMs,
+            isRunning = false,
+            phase = TimerPhase.PAUSED
+        )
     }
 
     fun stop(settings: AppSettings) {
+        stop(settings.focusDurationMs)
+    }
+
+    fun stop(focusDurationMs: Long) {
         ticker?.cancel()
         pausedPhase = TimerPhase.FOCUS
-        val duration = durationFor(TimerPhase.FOCUS, settings)
+        val duration = focusDurationMs.coerceAtLeast(0L)
         _state.value = TimerState(remainingMs = duration, totalMs = duration)
     }
 
-    fun skip(scope: CoroutineScope, settings: AppSettings) {
+    fun skip(settings: AppSettings) {
         val current = _state.value
         if (current.phase == TimerPhase.IDLE) return
 
@@ -77,23 +91,33 @@ class TimerEngine @Inject constructor() {
             totalMs = duration,
             isRunning = current.isRunning
         )
-        if (current.isRunning) runTicker(scope, settings)
+        if (current.isRunning) runTicker(settings)
     }
 
     fun setFaceDown(faceDown: Boolean) {
         _state.value = _state.value.copy(isFaceDown = faceDown)
     }
 
-    private fun runTicker(scope: CoroutineScope, settings: AppSettings) {
+    private fun runTicker(settings: AppSettings) {
         ticker?.cancel()
-        ticker = scope.launch {
+        deadlineNanos = System.nanoTime() + _state.value.remainingMs * NANOS_PER_MILLISECOND
+        ticker = tickerScope.launch {
             while (_state.value.isRunning) {
-                delay(1000)
-                val next = (_state.value.remainingMs - 1000).coerceAtLeast(0)
+                val next = remainingUntilDeadline()
                 _state.value = _state.value.copy(remainingMs = next)
-                if (next == 0L) advance(settings)
+                if (next == 0L) {
+                    advance(settings)
+                    deadlineNanos =
+                        System.nanoTime() + _state.value.remainingMs * NANOS_PER_MILLISECOND
+                }
+                delay(minOf(TICK_INTERVAL_MS, _state.value.remainingMs.coerceAtLeast(1L)))
             }
         }
+    }
+
+    private fun remainingUntilDeadline(): Long {
+        val remainingNanos = (deadlineNanos - System.nanoTime()).coerceAtLeast(0L)
+        return (remainingNanos + NANOS_PER_MILLISECOND - 1) / NANOS_PER_MILLISECOND
     }
 
     private fun advance(settings: AppSettings) {
@@ -127,5 +151,10 @@ class TimerEngine @Inject constructor() {
             TimerPhase.SHORT_BREAK -> settings.shortBreakMin * 60_000L
             TimerPhase.LONG_BREAK -> settings.longBreakMin * 60_000L
         }
+    }
+
+    private companion object {
+        const val TICK_INTERVAL_MS = 1_000L
+        const val NANOS_PER_MILLISECOND = 1_000_000L
     }
 }

@@ -11,8 +11,15 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.nashitimer.MainActivity
 import com.example.nashitimer.R
+import com.example.nashitimer.core.timer.TimerEngine
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class PomodoroService : Service() {
+    @Inject
+    lateinit var timerEngine: TimerEngine
+
     override fun onCreate() {
         super.onCreate()
         createChannel()
@@ -20,6 +27,9 @@ class PomodoroService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
+            timerEngine.stop(
+                intent.getLongExtra(EXTRA_FOCUS_DURATION_MS, DEFAULT_FOCUS_DURATION_MS)
+            )
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
@@ -29,15 +39,24 @@ class PomodoroService : Service() {
             notification(
                 time = intent?.getStringExtra(EXTRA_TIME) ?: "--:--",
                 remainingMs = intent?.getLongExtra(EXTRA_REMAINING_MS, 0L) ?: 0L,
-                totalMs = intent?.getLongExtra(EXTRA_TOTAL_MS, 0L) ?: 0L
+                totalMs = intent?.getLongExtra(EXTRA_TOTAL_MS, 0L) ?: 0L,
+                focusDurationMs = intent?.getLongExtra(
+                    EXTRA_FOCUS_DURATION_MS,
+                    DEFAULT_FOCUS_DURATION_MS
+                ) ?: DEFAULT_FOCUS_DURATION_MS
             )
         )
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(time: String, remainingMs: Long, totalMs: Long): Notification {
+    private fun notification(
+        time: String,
+        remainingMs: Long,
+        totalMs: Long,
+        focusDurationMs: Long
+    ): Notification {
         val openIntent = PendingIntent.getActivity(
             this,
             0,
@@ -47,8 +66,10 @@ class PomodoroService : Service() {
         val stopIntent = PendingIntent.getService(
             this,
             1,
-            Intent(this, PomodoroService::class.java).setAction(ACTION_STOP),
-            PendingIntent.FLAG_IMMUTABLE
+            Intent(this, PomodoroService::class.java)
+                .setAction(ACTION_STOP)
+                .putExtra(EXTRA_FOCUS_DURATION_MS, focusDurationMs),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val progress = calculateProgress(remainingMs, totalMs)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -94,6 +115,8 @@ class PomodoroService : Service() {
         const val EXTRA_TIME = "extra_time"
         const val EXTRA_REMAINING_MS = "extra_remaining_ms"
         const val EXTRA_TOTAL_MS = "extra_total_ms"
+        const val EXTRA_FOCUS_DURATION_MS = "extra_focus_duration_ms"
+        private const val DEFAULT_FOCUS_DURATION_MS = 25 * 60_000L
 
         private fun calculateProgress(remainingMs: Long, totalMs: Long): Int {
             if (totalMs <= 0L) return 0

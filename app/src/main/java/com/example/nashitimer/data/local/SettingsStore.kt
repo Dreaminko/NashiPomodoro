@@ -18,7 +18,7 @@ private val Context.settingsDataStore by preferencesDataStore("nashitimer_settin
 
 @Singleton
 class SettingsStore @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     val settings: Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
         AppSettings(
@@ -30,6 +30,7 @@ class SettingsStore @Inject constructor(
             themeMode = prefs[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                 ?: ThemeMode.DARK,
             vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
+            vibrationIntensity = (prefs[Keys.VIBRATION_INTENSITY] ?: 60).coerceIn(10, 100),
             debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
             debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
         )
@@ -46,6 +47,7 @@ class SettingsStore @Inject constructor(
                 themeMode = prefs[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                     ?: ThemeMode.DARK,
                 vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
+                vibrationIntensity = (prefs[Keys.VIBRATION_INTENSITY] ?: 60).coerceIn(10, 100),
                 debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
                 debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
             ).transform()
@@ -56,6 +58,7 @@ class SettingsStore @Inject constructor(
             prefs[Keys.DAILY_GOAL] = next.dailyGoal
             prefs[Keys.THEME] = next.themeMode.name
             prefs[Keys.VIBRATION] = next.vibrationEnabled
+            prefs[Keys.VIBRATION_INTENSITY] = next.vibrationIntensity.coerceIn(10, 100)
             prefs[Keys.DEBUG_MODE] = next.debugModeEnabled
             prefs[Keys.DEBUG_FOCUS_SEC] = next.debugFocusDurationSec
         }
@@ -69,6 +72,7 @@ class SettingsStore @Inject constructor(
         val DAILY_GOAL = intPreferencesKey("daily_goal")
         val THEME = stringPreferencesKey("theme")
         val VIBRATION = booleanPreferencesKey("vibration")
+        val VIBRATION_INTENSITY = intPreferencesKey("vibration_intensity")
         val DEBUG_MODE = booleanPreferencesKey("debug_mode")
         val DEBUG_FOCUS_SEC = intPreferencesKey("debug_focus_sec")
     }

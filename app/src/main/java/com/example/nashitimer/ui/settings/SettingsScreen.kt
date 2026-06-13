@@ -1,6 +1,7 @@
 package com.example.nashitimer.ui.settings
 
 import android.app.LocaleManager
+import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,11 +51,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.R
 import com.example.nashitimer.domain.model.ThemeMode
 import com.example.nashitimer.ui.components.NashiSwitch
@@ -114,7 +116,7 @@ fun TimerSettingsScreen(
     onBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val settings by viewModel.settings.collectAsState()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     SettingsPage(
         title = stringResource(R.string.settings_timer_section),
@@ -196,7 +198,7 @@ fun ReminderSettingsScreen(
     onBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val settings by viewModel.settings.collectAsState()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     SettingsPage(
         title = stringResource(R.string.settings_reminder_section),
@@ -218,6 +220,18 @@ fun ReminderSettingsScreen(
                     checked = settings.vibrationEnabled,
                     onCheckedChange = viewModel::setVibration
                 )
+                SettingDivider()
+                NumberSetting(
+                    label = stringResource(R.string.settings_vibration_intensity),
+                    description = stringResource(R.string.settings_vibration_intensity_description),
+                    value = settings.vibrationIntensity,
+                    suffix = stringResource(R.string.unit_percent),
+                    range = 10f..100f,
+                    step = 10,
+                    enabled = settings.vibrationEnabled,
+                    onPreview = viewModel::previewVibrationIntensity,
+                    onChange = viewModel::setVibrationIntensity
+                )
             }
         }
     }
@@ -228,7 +242,7 @@ fun AppearanceSettingsScreen(
     onBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val settings by viewModel.settings.collectAsState()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val localeManager = context.getSystemService(LocaleManager::class.java)
     val applicationLocales = localeManager.applicationLocales
@@ -436,6 +450,8 @@ private fun NumberSetting(
     suffix: String,
     range: ClosedFloatingPointRange<Float>,
     step: Int,
+    enabled: Boolean = true,
+    onPreview: (Int) -> Unit = {},
     onChange: (Int) -> Unit
 ) {
     val intervalCount = ((range.endInclusive - range.start) / step).toInt()
@@ -450,18 +466,27 @@ private fun NumberSetting(
             SettingText(label, description, Modifier.weight(1f))
             Text(
                 text = "${sliderValue.roundToInt()} $suffix",
-                color = MaterialTheme.colorScheme.primary,
+                color = if (enabled) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 fontWeight = FontWeight.SemiBold
             )
         }
         Slider(
             value = sliderValue.coerceIn(range.start, range.endInclusive),
+            enabled = enabled,
             onValueChange = {
-                sliderValue =
+                val nextValue =
                     (((it - range.start) / step).roundToInt() * step + range.start).coerceIn(
                         range.start,
                         range.endInclusive
                     )
+                if (nextValue != sliderValue) {
+                    sliderValue = nextValue
+                    onPreview(nextValue.roundToInt())
+                }
             },
             onValueChangeFinished = { onChange(sliderValue.roundToInt()) },
             valueRange = range,
@@ -548,6 +573,7 @@ private fun LanguageDropdownSetting(
     onSelect: (LanguageOption) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val selectedDisplayName = selected.displayName()
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SettingText(label, description)
@@ -556,7 +582,7 @@ private fun LanguageDropdownSetting(
             onExpandedChange = { expanded = it }
         ) {
             OutlinedTextField(
-                value = stringResource(selected.labelRes),
+                value = selectedDisplayName,
                 onValueChange = {},
                 modifier = Modifier
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
@@ -574,8 +600,9 @@ private fun LanguageDropdownSetting(
             ) {
                 LanguageOption.entries.forEach { language ->
                     val isSelected = language == selected
+                    val displayName = language.displayName()
                     DropdownMenuItem(
-                        text = { Text(stringResource(language.labelRes)) },
+                        text = { Text(displayName) },
                         onClick = {
                             expanded = false
                             onSelect(language)
@@ -626,10 +653,23 @@ private fun ThemeMode.displayName(): String = stringResource(
 private enum class LanguageOption(
     val languageCode: String?,
     val languageTag: String?,
-    val labelRes: Int
+    val nativeName: String?
 ) {
-    FOLLOW_SYSTEM(null, null, R.string.language_system),
-    ENGLISH("en", "en", R.string.language_english),
-    SIMPLIFIED_CHINESE("zh", "zh-CN", R.string.language_simplified_chinese),
-    JAPANESE("ja", "ja", R.string.language_japanese)
+    FOLLOW_SYSTEM(null, null, null),
+    ENGLISH("en", "en", "English"),
+    SIMPLIFIED_CHINESE("zh", "zh-CN", "简体中文"),
+    JAPANESE("ja", "ja", "日本語")
+}
+
+@Composable
+private fun LanguageOption.displayName(): String {
+    nativeName?.let { return it }
+
+    val context = LocalContext.current
+    val systemLocales = context.getSystemService(LocaleManager::class.java).systemLocales
+    val systemConfiguration = Configuration(LocalConfiguration.current).apply {
+        setLocales(systemLocales)
+    }
+    return context.createConfigurationContext(systemConfiguration)
+        .getString(R.string.language_system)
 }
