@@ -11,6 +11,13 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.DARK,
     val vibrationEnabled: Boolean = true,
     val vibrationIntensity: Int = 60,
+    val glyphProgressEnabled: Boolean = true,
+    val glyphProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphShortBreakProgressEnabled: Boolean = true,
+    val glyphShortBreakProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphLongBreakProgressEnabled: Boolean = true,
+    val glyphLongBreakProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphCompletionFlashEnabled: Boolean = true,
     val debugModeEnabled: Boolean = false,
     val debugFocusDurationSec: Int = 30
 ) {
@@ -47,3 +54,5 @@ data class AppSettings(
 }
 
 enum class ThemeMode { LIGHT, DARK, FOLLOW_SYSTEM }
+
+enum class GlyphChannel { AUTO, A, B, C, D, E }

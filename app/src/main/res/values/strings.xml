@@ -23,6 +23,7 @@
     <string name="timer_running_hint">Stay with this moment</string>
     <string name="timer_ready_hint">Ready when you are</string>
     <string name="timer_glyph_active">Glyph focus is active</string>
+    <string name="timer_flip_focus_active">Flip focus is active</string>
     <string name="timer_flip_to_begin">Flip your phone to begin</string>
     <string name="timer_screen_dimmed">Screen dimmed to keep distractions away</string>
     <string name="timer_phone_position_hint">The timer follows the position of your phone</string>
@@ -137,6 +138,18 @@
     <string name="unit_percent">%</string>
     <string name="settings_completion_section">Session completion</string>
     <string name="settings_completion_section_description">Choose how NashiTimer gets your attention</string>
+    <string name="settings_glyph_section">Glyph Interface</string>
+    <string name="settings_glyph_section_description">Choose how lights accompany your sessions</string>
+    <string name="settings_glyph_progress">Focus progress</string>
+    <string name="settings_glyph_progress_description">Show remaining focus time on the Glyph Interface</string>
+    <string name="settings_glyph_short_break_progress">Short break progress</string>
+    <string name="settings_glyph_short_break_progress_description">Show remaining short break time on the selected light strip</string>
+    <string name="settings_glyph_long_break_progress">Long break progress</string>
+    <string name="settings_glyph_long_break_progress_description">Show remaining long break time on the selected light strip</string>
+    <string name="settings_glyph_light_strip">Light strip</string>
+    <string name="settings_glyph_light_strip_auto">Auto</string>
+    <string name="settings_glyph_completion_flash">Completion flash</string>
+    <string name="settings_glyph_completion_flash_description">Flash the Glyph Interface when a focus session ends</string>
     <string name="settings_developer_section">Developer</string>
     <string name="settings_debug_description">Device diagnostics and test controls</string>
 

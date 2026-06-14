@@ -187,6 +187,7 @@ fun TimerScreen(
 
         GlyphStatus(
             isFaceDown = uiState.timer.isFaceDown,
+            glyphProgressEnabled = uiState.settings.glyphProgressEnabled,
             accent = accent
         )
 
@@ -288,6 +289,7 @@ private fun CountdownTime(timeText: String) {
 @Composable
 private fun GlyphStatus(
     isFaceDown: Boolean,
+    glyphProgressEnabled: Boolean,
     accent: Color
 ) {
     Surface(
@@ -311,7 +313,11 @@ private fun GlyphStatus(
                 Text(
                     stringResource(
                         if (isFaceDown) {
-                            R.string.timer_glyph_active
+                            if (glyphProgressEnabled) {
+                                R.string.timer_glyph_active
+                            } else {
+                                R.string.timer_flip_focus_active
+                            }
                         } else {
                             R.string.timer_flip_to_begin
                         }

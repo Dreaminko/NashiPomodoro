@@ -23,6 +23,7 @@
     <string name="timer_running_hint">今この瞬間に集中しましょう</string>
     <string name="timer_ready_hint">準備ができたら始めましょう</string>
     <string name="timer_glyph_active">Glyph 集中モードが有効です</string>
+    <string name="timer_flip_focus_active">フリップ集中モードが有効です</string>
     <string name="timer_flip_to_begin">スマートフォンを伏せて開始</string>
     <string name="timer_screen_dimmed">集中を妨げないよう画面を暗くしました</string>
     <string name="timer_phone_position_hint">タイマーはスマートフォンの向きに連動します</string>
@@ -133,6 +134,18 @@
     <string name="unit_percent">%</string>
     <string name="settings_completion_section">セッション完了</string>
     <string name="settings_completion_section_description">NashiTimer からの通知方法を選択</string>
+    <string name="settings_glyph_section">Glyph Interface</string>
+    <string name="settings_glyph_section_description">セッション中のライト表示を選択します</string>
+    <string name="settings_glyph_progress">集中の進捗</string>
+    <string name="settings_glyph_progress_description">Glyph Interface に残りの集中時間を表示します</string>
+    <string name="settings_glyph_short_break_progress">短い休憩の進捗</string>
+    <string name="settings_glyph_short_break_progress_description">選択したライトストリップに短い休憩の残り時間を表示します</string>
+    <string name="settings_glyph_long_break_progress">長い休憩の進捗</string>
+    <string name="settings_glyph_long_break_progress_description">選択したライトストリップに長い休憩の残り時間を表示します</string>
+    <string name="settings_glyph_light_strip">ライトストリップ</string>
+    <string name="settings_glyph_light_strip_auto">自動</string>
+    <string name="settings_glyph_completion_flash">完了時の点滅</string>
+    <string name="settings_glyph_completion_flash_description">集中セッション終了時に Glyph Interface を点滅させます</string>
     <string name="settings_developer_section">開発者向け</string>
     <string name="settings_debug_description">デバイス診断とテスト操作</string>
 

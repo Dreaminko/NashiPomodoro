@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
+import com.example.nashitimer.domain.model.GlyphChannel
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
 import com.nothing.ketchum.GlyphManager
@@ -38,6 +39,8 @@ class GlyphController @Inject constructor(
     private var progressAnchorRemainingMs = 0L
     private var progressAnchorElapsedMs = 0L
     private var progressTotalMs = 0L
+    private var progressChannel = GlyphChannel.AUTO
+    private var progressSource = GlyphProgressSource.FOCUS
     private var nextProgressFrameElapsedMs = 0L
     private var lastProgressFrame: IntArray? = null
     private val _debugState = MutableStateFlow(GlyphDebugState())
@@ -49,7 +52,12 @@ class GlyphController @Inject constructor(
             val remainingMs = (progressAnchorRemainingMs - elapsedMs).coerceAtLeast(0L)
             manager?.let { glyphManager ->
                 runCatching {
-                    displayFocusFrame(glyphManager, remainingMs, progressTotalMs)
+                    displayFocusFrame(
+                        glyphManager,
+                        remainingMs,
+                        progressTotalMs,
+                        progressChannel
+                    )
                 }.onFailure {
                     stopProgressAnimation()
                     logFailure("updating focus progress", it)
@@ -201,7 +209,12 @@ class GlyphController @Inject constructor(
     private fun showFocus(glyphManager: GlyphManager, effect: GlyphEffect.FocusProgress) {
         if (!effect.animate) {
             stopProgressAnimation()
-            displayFocusFrame(glyphManager, effect.remainingMs, effect.totalMs)
+            displayFocusFrame(
+                glyphManager,
+                effect.remainingMs,
+                effect.totalMs,
+                effect.channel
+            )
             return
         }
 
@@ -213,7 +226,10 @@ class GlyphController @Inject constructor(
 
         val now = SystemClock.elapsedRealtime()
         val requestedRemainingMs = effect.remainingMs.coerceIn(0L, totalMs)
-        val animationRunning = progressTotalMs == totalMs
+        val animationRunning =
+            progressTotalMs == totalMs &&
+                progressChannel == effect.channel &&
+                progressSource == effect.source
         progressAnchorRemainingMs = if (animationRunning) {
             minOf(requestedRemainingMs, interpolatedRemainingMs(now))
         } else {
@@ -221,6 +237,8 @@ class GlyphController @Inject constructor(
         }
         progressAnchorElapsedMs = now
         progressTotalMs = totalMs
+        progressChannel = effect.channel
+        progressSource = effect.source
 
         if (!animationRunning) {
             nextProgressFrameElapsedMs = SystemClock.uptimeMillis()
@@ -236,9 +254,10 @@ class GlyphController @Inject constructor(
     private fun displayFocusFrame(
         glyphManager: GlyphManager,
         remainingMs: Long,
-        totalMs: Long
+        totalMs: Long,
+        channel: GlyphChannel
     ) {
-        val ledIndices = adapter.profile.progressLedIndices
+        val ledIndices = adapter.profile.progressLedIndices(channel)
         if (ledIndices.isEmpty() || totalMs <= 0L) return
 
         val brightness = GlyphProgressBrightness.calculate(
@@ -258,6 +277,8 @@ class GlyphController @Inject constructor(
     private fun stopProgressAnimation() {
         handler.removeCallbacks(progressFrameRunnable)
         progressTotalMs = 0L
+        progressChannel = GlyphChannel.AUTO
+        progressSource = GlyphProgressSource.FOCUS
         nextProgressFrameElapsedMs = 0L
         lastProgressFrame = null
     }
@@ -294,7 +315,8 @@ class GlyphController @Inject constructor(
 
     private fun effectKey(effect: GlyphEffect): String = when (effect) {
         is GlyphEffect.FocusProgress -> {
-            "focus:${effect.remainingMs}:${effect.totalMs}:${effect.animate}"
+            "progress:${effect.source}:${effect.remainingMs}:${effect.totalMs}:" +
+                "${effect.channel}:${effect.animate}"
         }
         GlyphEffect.ShortBreak -> "short-break"
         GlyphEffect.LongBreak -> "long-break"

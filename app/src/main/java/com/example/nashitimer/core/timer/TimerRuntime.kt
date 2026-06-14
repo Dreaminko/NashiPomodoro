@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.nashitimer.core.glyph.GlyphController
 import com.example.nashitimer.core.glyph.GlyphEffect
+import com.example.nashitimer.core.glyph.GlyphProgressSource
 import com.example.nashitimer.core.haptics.VibrationController
 import com.example.nashitimer.core.service.PomodoroService
 import com.example.nashitimer.data.local.TaskSelectionStore
@@ -161,8 +162,10 @@ class TimerRuntime @Inject constructor(
                     )
                 )
                 if (!inserted) return@collect
-                glyphController.show(GlyphEffect.CompleteFlash)
                 val currentSettings = settings.value
+                if (currentSettings.glyphCompletionFlashEnabled) {
+                    glyphController.show(GlyphEffect.CompleteFlash)
+                }
                 if (currentSettings.vibrationEnabled) {
                     vibrationController.notifyTimerCompletion(
                         currentSettings.vibrationAmplitude
@@ -186,21 +189,50 @@ class TimerRuntime @Inject constructor(
                     context.stopService(Intent(context, PomodoroService::class.java))
                 }
 
-                when {
-                    state.isRunning && state.phase == TimerPhase.FOCUS ->
-                        glyphController.show(
-                            GlyphEffect.FocusProgress(
-                                remainingMs = state.remainingMs,
-                                totalMs = state.totalMs
-                            )
-                        )
-                    state.isRunning && state.phase == TimerPhase.SHORT_BREAK ->
-                        glyphController.show(GlyphEffect.ShortBreak)
-                    state.isRunning && state.phase == TimerPhase.LONG_BREAK ->
-                        glyphController.show(GlyphEffect.LongBreak)
-                    wasRunning -> glyphController.show(GlyphEffect.Off)
-                }
                 wasRunning = state.isRunning
+            }
+        }
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            var glyphStateActive = false
+            combine(engine.state, settings) { state, appSettings ->
+                when {
+                    state.isRunning &&
+                        state.phase == TimerPhase.FOCUS &&
+                        appSettings.glyphProgressEnabled ->
+                        GlyphEffect.FocusProgress(
+                            remainingMs = state.remainingMs,
+                            totalMs = state.totalMs,
+                            channel = appSettings.glyphProgressChannel,
+                            source = GlyphProgressSource.FOCUS
+                        )
+                    state.isRunning &&
+                        state.phase == TimerPhase.SHORT_BREAK &&
+                        appSettings.glyphShortBreakProgressEnabled ->
+                        GlyphEffect.FocusProgress(
+                            remainingMs = state.remainingMs,
+                            totalMs = state.totalMs,
+                            channel = appSettings.glyphShortBreakProgressChannel,
+                            source = GlyphProgressSource.SHORT_BREAK
+                        )
+                    state.isRunning &&
+                        state.phase == TimerPhase.LONG_BREAK &&
+                        appSettings.glyphLongBreakProgressEnabled ->
+                        GlyphEffect.FocusProgress(
+                            remainingMs = state.remainingMs,
+                            totalMs = state.totalMs,
+                            channel = appSettings.glyphLongBreakProgressChannel,
+                            source = GlyphProgressSource.LONG_BREAK
+                        )
+                    else -> GlyphEffect.Off
+                }
+            }.collect { effect ->
+                if (effect != GlyphEffect.Off) {
+                    glyphController.show(effect)
+                    glyphStateActive = true
+                } else if (glyphStateActive) {
+                    glyphController.show(GlyphEffect.Off)
+                    glyphStateActive = false
+                }
             }
         }
     }

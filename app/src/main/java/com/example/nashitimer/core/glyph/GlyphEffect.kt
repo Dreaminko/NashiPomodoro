@@ -1,14 +1,26 @@
 package com.example.nashitimer.core.glyph
 
+import com.example.nashitimer.domain.model.GlyphChannel
+
+enum class GlyphProgressSource {
+    FOCUS,
+    SHORT_BREAK,
+    LONG_BREAK
+}
+
 sealed interface GlyphEffect {
     data class FocusProgress(
         val remainingMs: Long,
         val totalMs: Long,
+        val channel: GlyphChannel = GlyphChannel.AUTO,
+        val source: GlyphProgressSource = GlyphProgressSource.FOCUS,
         val animate: Boolean = true
     ) : GlyphEffect {
         constructor(remainingFraction: Float) : this(
             remainingMs = (remainingFraction.coerceIn(0f, 1f) * STATIC_TOTAL_MS).toLong(),
             totalMs = STATIC_TOTAL_MS,
+            channel = GlyphChannel.AUTO,
+            source = GlyphProgressSource.FOCUS,
             animate = false
         )
 

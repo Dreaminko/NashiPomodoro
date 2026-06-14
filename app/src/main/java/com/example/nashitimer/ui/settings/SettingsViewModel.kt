@@ -2,9 +2,11 @@ package com.example.nashitimer.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nashitimer.core.glyph.GlyphDeviceAdapter
 import com.example.nashitimer.core.haptics.VibrationController
 import com.example.nashitimer.data.repository.SettingsRepository
 import com.example.nashitimer.domain.model.AppSettings
+import com.example.nashitimer.domain.model.GlyphChannel
 import com.example.nashitimer.domain.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,8 +18,12 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val vibrationController: VibrationController,
-    private val repository: SettingsRepository
+    private val repository: SettingsRepository,
+    adapter: GlyphDeviceAdapter
 ) : ViewModel() {
+    val availableGlyphChannels: List<GlyphChannel> =
+        listOf(GlyphChannel.AUTO) + adapter.profile.availableProgressChannels
+
     val settings: StateFlow<AppSettings> = repository.settings.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
@@ -33,6 +39,19 @@ class SettingsViewModel @Inject constructor(
     fun setVibration(value: Boolean) = update { copy(vibrationEnabled = value) }
     fun setVibrationIntensity(value: Int) =
         update { copy(vibrationIntensity = value.snapToStep(10, 100, 10)) }
+    fun setGlyphProgress(value: Boolean) = update { copy(glyphProgressEnabled = value) }
+    fun setGlyphProgressChannel(value: GlyphChannel) =
+        update { copy(glyphProgressChannel = value) }
+    fun setGlyphShortBreakProgress(value: Boolean) =
+        update { copy(glyphShortBreakProgressEnabled = value) }
+    fun setGlyphShortBreakProgressChannel(value: GlyphChannel) =
+        update { copy(glyphShortBreakProgressChannel = value) }
+    fun setGlyphLongBreakProgress(value: Boolean) =
+        update { copy(glyphLongBreakProgressEnabled = value) }
+    fun setGlyphLongBreakProgressChannel(value: GlyphChannel) =
+        update { copy(glyphLongBreakProgressChannel = value) }
+    fun setGlyphCompletionFlash(value: Boolean) =
+        update { copy(glyphCompletionFlashEnabled = value) }
 
     fun previewVibrationIntensity(value: Int) {
         val intensity = value.snapToStep(10, 100, 10)

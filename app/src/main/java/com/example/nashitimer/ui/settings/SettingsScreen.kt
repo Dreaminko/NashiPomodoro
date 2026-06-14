@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.R
+import com.example.nashitimer.domain.model.GlyphChannel
 import com.example.nashitimer.domain.model.ThemeMode
 import com.example.nashitimer.ui.components.NashiSwitch
 import com.example.nashitimer.ui.components.PageTitle
@@ -199,6 +200,7 @@ fun ReminderSettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val availableGlyphChannels = viewModel.availableGlyphChannels
 
     SettingsPage(
         title = stringResource(R.string.settings_reminder_section),
@@ -231,6 +233,59 @@ fun ReminderSettingsScreen(
                     enabled = settings.vibrationEnabled,
                     onPreview = viewModel::previewVibrationIntensity,
                     onChange = viewModel::setVibrationIntensity
+                )
+            }
+        }
+
+        item {
+            SectionHeader(
+                title = stringResource(R.string.settings_glyph_section),
+                description = stringResource(R.string.settings_glyph_section_description)
+            )
+        }
+        item {
+            SettingsCard {
+                GlyphProgressSetting(
+                    label = stringResource(R.string.settings_glyph_progress),
+                    description = stringResource(R.string.settings_glyph_progress_description),
+                    enabled = settings.glyphProgressEnabled,
+                    selectedChannel = settings.glyphProgressChannel,
+                    availableChannels = availableGlyphChannels,
+                    onEnabledChange = viewModel::setGlyphProgress,
+                    onChannelChange = viewModel::setGlyphProgressChannel
+                )
+                SettingDivider()
+                GlyphProgressSetting(
+                    label = stringResource(R.string.settings_glyph_short_break_progress),
+                    description = stringResource(
+                        R.string.settings_glyph_short_break_progress_description
+                    ),
+                    enabled = settings.glyphShortBreakProgressEnabled,
+                    selectedChannel = settings.glyphShortBreakProgressChannel,
+                    availableChannels = availableGlyphChannels,
+                    onEnabledChange = viewModel::setGlyphShortBreakProgress,
+                    onChannelChange = viewModel::setGlyphShortBreakProgressChannel
+                )
+                SettingDivider()
+                GlyphProgressSetting(
+                    label = stringResource(R.string.settings_glyph_long_break_progress),
+                    description = stringResource(
+                        R.string.settings_glyph_long_break_progress_description
+                    ),
+                    enabled = settings.glyphLongBreakProgressEnabled,
+                    selectedChannel = settings.glyphLongBreakProgressChannel,
+                    availableChannels = availableGlyphChannels,
+                    onEnabledChange = viewModel::setGlyphLongBreakProgress,
+                    onChannelChange = viewModel::setGlyphLongBreakProgressChannel
+                )
+                SettingDivider()
+                ToggleSetting(
+                    label = stringResource(R.string.settings_glyph_completion_flash),
+                    description = stringResource(
+                        R.string.settings_glyph_completion_flash_description
+                    ),
+                    checked = settings.glyphCompletionFlashEnabled,
+                    onCheckedChange = viewModel::setGlyphCompletionFlash
                 )
             }
         }
@@ -640,6 +695,64 @@ private fun ToggleSetting(
         NashiSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
+
+@Composable
+private fun GlyphProgressSetting(
+    label: String,
+    description: String,
+    enabled: Boolean,
+    selectedChannel: GlyphChannel,
+    availableChannels: List<GlyphChannel>,
+    onEnabledChange: (Boolean) -> Unit,
+    onChannelChange: (GlyphChannel) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        ToggleSetting(
+            label = label,
+            description = description,
+            checked = enabled,
+            onCheckedChange = onEnabledChange
+        )
+        if (enabled) {
+            Text(
+                text = stringResource(R.string.settings_glyph_light_strip),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availableChannels.forEach { channel ->
+                    FilterChip(
+                        selected = selectedChannel == channel,
+                        onClick = { onChannelChange(channel) },
+                        label = { Text(channel.displayName()) },
+                        leadingIcon = if (selectedChannel == channel) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            }
+                        } else {
+                            null
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlyphChannel.displayName(): String =
+    if (this == GlyphChannel.AUTO) {
+        stringResource(R.string.settings_glyph_light_strip_auto)
+    } else {
+        name
+    }
 
 @Composable
 private fun ThemeMode.displayName(): String = stringResource(

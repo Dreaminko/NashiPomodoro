@@ -23,6 +23,7 @@
     <string name="timer_running_hint">专注于此刻</string>
     <string name="timer_ready_hint">准备好后即可开始</string>
     <string name="timer_glyph_active">Glyph 专注已开启</string>
+    <string name="timer_flip_focus_active">翻转专注已开启</string>
     <string name="timer_flip_to_begin">翻转手机即可开始</string>
     <string name="timer_screen_dimmed">屏幕已调暗，减少干扰</string>
     <string name="timer_phone_position_hint">计时器会跟随手机姿态运行</string>
@@ -133,6 +134,18 @@
     <string name="unit_percent">%</string>
     <string name="settings_completion_section">完成提醒</string>
     <string name="settings_completion_section_description">选择 NashiTimer 提醒你的方式</string>
+    <string name="settings_glyph_section">Glyph 灯效</string>
+    <string name="settings_glyph_section_description">选择灯光如何配合你的专注时段</string>
+    <string name="settings_glyph_progress">专注进度</string>
+    <string name="settings_glyph_progress_description">在 Glyph Interface 上显示剩余专注时间</string>
+    <string name="settings_glyph_short_break_progress">短休息进度</string>
+    <string name="settings_glyph_short_break_progress_description">在选中的灯条上显示短休息剩余时间</string>
+    <string name="settings_glyph_long_break_progress">长休息进度</string>
+    <string name="settings_glyph_long_break_progress_description">在选中的灯条上显示长休息剩余时间</string>
+    <string name="settings_glyph_light_strip">灯条</string>
+    <string name="settings_glyph_light_strip_auto">自动</string>
+    <string name="settings_glyph_completion_flash">完成闪烁</string>
+    <string name="settings_glyph_completion_flash_description">专注时段结束时闪烁 Glyph Interface</string>
     <string name="settings_developer_section">开发者</string>
     <string name="settings_debug_description">设备诊断与测试控制</string>
 
