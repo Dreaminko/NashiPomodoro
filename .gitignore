@@ -18,6 +18,11 @@ out/
 # Build captures and generated reports
 captures/
 app/release/
+/META-INF/
+*.apk
+*.aab
+*.apks
+*.idsig
 *.hprof
 *.log
 
