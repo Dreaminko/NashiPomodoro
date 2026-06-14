@@ -17,6 +17,7 @@ out/
 
 # Build captures and generated reports
 captures/
+app/release/
 *.hprof
 *.log
 
