@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -62,6 +63,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nashitimer.R
@@ -97,7 +99,8 @@ fun TimerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 18.dp),
+            .padding(horizontal = 24.dp)
+            .padding(top = 12.dp, bottom = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -111,7 +114,7 @@ fun TimerScreen(
             )
             IconButton(
                 onClick = onOpenSettings,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
@@ -122,39 +125,50 @@ fun TimerScreen(
         }
 
         uiState.activeTask?.let { task ->
-            Text(
-                text = stringResource(R.string.timer_active_task, task.title),
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = CircleShape
+            ) {
+                Text(
+                    text = stringResource(R.string.timer_active_task, task.title),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1
+                )
+            }
         }
 
-        Spacer(Modifier.weight(0.6f))
+        Spacer(Modifier.weight(0.45f))
 
         Box(contentAlignment = Alignment.Center) {
-            ProgressRing(progress = progress, activeColor = accent)
+            ProgressRing(
+                progress = progress,
+                activeColor = accent,
+                diameter = 264.dp,
+                strokeWidth = 10.dp
+            )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(
-                    color = accent.copy(alpha = 0.14f),
-                    contentColor = accent,
-                    shape = RoundedCornerShape(50)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    Box(
+                        Modifier
+                            .size(7.dp)
+                            .background(accent, CircleShape)
+                    )
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = stringResource(uiState.timer.phase.labelRes).uppercase(),
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        color = accent,
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = uiState.timer.timeText,
-                    style = MaterialTheme.typography.displayLarge,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Light
-                )
+                Spacer(Modifier.height(10.dp))
+                CountdownTime(uiState.timer.timeText)
                 Text(
                     stringResource(
                         if (uiState.timer.isRunning) {
@@ -169,108 +183,12 @@ fun TimerScreen(
             }
         }
 
-        Spacer(Modifier.weight(0.6f))
+        Spacer(Modifier.weight(0.4f))
 
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = MaterialTheme.shapes.large
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    Modifier
-                        .size(10.dp)
-                        .background(
-                            if (uiState.timer.isFaceDown) accent else MaterialTheme.colorScheme.outline,
-                            CircleShape
-                        )
-                )
-                Column(Modifier.padding(start = 12.dp)) {
-                    Text(
-                        stringResource(
-                            if (uiState.timer.isFaceDown) {
-                                R.string.timer_glyph_active
-                            } else {
-                                R.string.timer_flip_to_begin
-                            }
-                        ),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        stringResource(
-                            if (uiState.timer.isFaceDown) {
-                                R.string.timer_screen_dimmed
-                            } else {
-                                R.string.timer_phone_position_hint
-                            }
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 24.dp,
-                alignment = Alignment.CenterHorizontally
-            ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier.size(72.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                FilledTonalIconButton(
-                    onClick = viewModel::end,
-                    modifier = Modifier.size(64.dp),
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Stop,
-                        contentDescription = stringResource(R.string.timer_end_session),
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier.size(72.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                FilledIconButton(
-                    onClick = viewModel::toggleManual,
-                    modifier = Modifier.size(64.dp),
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = if (uiState.timer.isRunning) {
-                            Icons.Rounded.Pause
-                        } else {
-                            Icons.Rounded.PlayArrow
-                        },
-                        contentDescription = stringResource(
-                            if (uiState.timer.isRunning) {
-                                R.string.timer_pause_focus
-                        } else {
-                                R.string.timer_start_focus
-                            }
-                        ),
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
-            LongPressSkipButton(
-                onLongClick = viewModel::skip,
-                enabled = uiState.timer.phase != TimerPhase.IDLE,
-            )
-        }
+        GlyphStatus(
+            isFaceDown = uiState.timer.isFaceDown,
+            accent = accent
+        )
 
         Text(
             text = stringResource(
@@ -278,10 +196,141 @@ fun TimerScreen(
                 uiState.timer.completedFocusRounds + 1,
                 uiState.settings.longBreakInterval
             ),
-            modifier = Modifier.padding(top = 14.dp),
+            modifier = Modifier.padding(top = 12.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium
         )
+
+        Spacer(Modifier.height(14.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 22.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilledTonalIconButton(
+                onClick = viewModel::end,
+                enabled = uiState.timer.phase != TimerPhase.IDLE,
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Stop,
+                    contentDescription = stringResource(R.string.timer_end_session),
+                    modifier = Modifier.size(25.dp)
+                )
+            }
+            FilledIconButton(
+                onClick = viewModel::toggleManual,
+                modifier = Modifier.size(72.dp),
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = if (uiState.timer.isRunning) {
+                        Icons.Rounded.Pause
+                    } else {
+                        Icons.Rounded.PlayArrow
+                    },
+                    contentDescription = stringResource(
+                        if (uiState.timer.isRunning) {
+                            R.string.timer_pause_focus
+                    } else {
+                            R.string.timer_start_focus
+                        }
+                    ),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            LongPressSkipButton(
+                onLongClick = viewModel::skip,
+                enabled = uiState.timer.phase != TimerPhase.IDLE,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CountdownTime(timeText: String) {
+    // Adjust this value to move the colon down (positive) or up (negative).
+    val colonVerticalOffset = (-4).dp
+    val parts = timeText.split(':', limit = 2)
+    val minutes = parts.firstOrNull().orEmpty()
+    val seconds = parts.getOrNull(1).orEmpty()
+    val style = MaterialTheme.typography.displayLarge.copy(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Light,
+        letterSpacing = 1.sp,
+        fontFeatureSettings = "tnum"
+    )
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = minutes,
+            style = style
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = ":",
+            modifier = Modifier.offset(y = colonVerticalOffset),
+            style = style
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = seconds,
+            style = style
+        )
+    }
+}
+
+@Composable
+private fun GlyphStatus(
+    isFaceDown: Boolean,
+    accent: Color
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                Modifier
+                    .size(8.dp)
+                    .background(
+                        if (isFaceDown) accent else MaterialTheme.colorScheme.outline,
+                        CircleShape
+                    )
+            )
+            Spacer(Modifier.width(10.dp))
+            Column {
+                Text(
+                    stringResource(
+                        if (isFaceDown) {
+                            R.string.timer_glyph_active
+                        } else {
+                            R.string.timer_flip_to_begin
+                        }
+                    ),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(
+                        if (isFaceDown) {
+                            R.string.timer_screen_dimmed
+                        } else {
+                            R.string.timer_phone_position_hint
+                        }
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
@@ -301,7 +350,7 @@ private fun LongPressSkipButton(
 
     Box(
         modifier = Modifier
-            .size(72.dp)
+            .size(60.dp)
             .semantics {
                 role = Role.Button
                 contentDescription = skipDescription
@@ -352,7 +401,7 @@ private fun LongPressSkipButton(
             },
         contentAlignment = Alignment.Center
     ) {
-        Canvas(Modifier.size(72.dp)) {
+        Canvas(Modifier.size(60.dp)) {
             if (!isPressing) return@Canvas
             val stroke = 4.dp.toPx()
             val arcSize = Size(size.width - stroke, size.height - stroke)
@@ -371,7 +420,7 @@ private fun LongPressSkipButton(
         }
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(56.dp)
                 .clip(CircleShape)
                 .background(
                     if (enabled) containerColor else containerColor.copy(alpha = 0.38f)
@@ -381,7 +430,7 @@ private fun LongPressSkipButton(
             Icon(
                 imageVector = Icons.Rounded.SkipNext,
                 contentDescription = null,
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier.size(25.dp),
                 tint = if (enabled) contentColor else contentColor.copy(alpha = 0.38f)
             )
         }

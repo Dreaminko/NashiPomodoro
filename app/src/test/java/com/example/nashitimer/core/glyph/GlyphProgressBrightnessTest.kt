@@ -25,18 +25,34 @@ class GlyphProgressBrightnessTest {
         val brightness = GlyphProgressBrightness.calculate(0.425f, ledCount = 10)
 
         assertArrayEquals(
-            intArrayOf(4_000, 4_000, 4_000, 4_000, 1_000, 0, 0, 0, 0, 0),
+            intArrayOf(4_000, 4_000, 4_000, 4_000, 800, 0, 0, 0, 0, 0),
             brightness
         )
     }
 
     @Test
     fun calculate_preservesSmallBrightnessChanges() {
-        val earlier = GlyphProgressBrightness.calculate(0.425f, ledCount = 10)
-        val later = GlyphProgressBrightness.calculate(0.424f, ledCount = 10)
+        val earlier = GlyphProgressBrightness.calculate(0.45f, ledCount = 10)
+        val later = GlyphProgressBrightness.calculate(0.449f, ledCount = 10)
 
         assertTrue(earlier[4] > later[4])
-        assertTrue(earlier[4] - later[4] in 39..41)
+        assertTrue(earlier[4] - later[4] in 59..61)
+    }
+
+    @Test
+    fun calculate_avoidsUnstableLowBrightness() {
+        val brightness = GlyphProgressBrightness.calculate(0.401f, ledCount = 10)
+
+        assertEquals(GlyphProgressBrightness.MIN_STABLE_BRIGHTNESS, brightness[4])
+    }
+
+    @Test
+    fun shouldUpdate_accumulatesSmallChangesBeforeSubmittingFrame() {
+        val previous = intArrayOf(4_000, 2_000, 0)
+
+        assertTrue(!GlyphProgressBrightness.shouldUpdate(previous, intArrayOf(4_000, 1_969, 0)))
+        assertTrue(GlyphProgressBrightness.shouldUpdate(previous, intArrayOf(4_000, 1_968, 0)))
+        assertTrue(GlyphProgressBrightness.shouldUpdate(previous, intArrayOf(4_000, 2_000, 800)))
     }
 
     @Test

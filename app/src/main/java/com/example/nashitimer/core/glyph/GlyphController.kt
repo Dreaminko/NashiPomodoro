@@ -38,6 +38,7 @@ class GlyphController @Inject constructor(
     private var progressAnchorRemainingMs = 0L
     private var progressAnchorElapsedMs = 0L
     private var progressTotalMs = 0L
+    private var nextProgressFrameElapsedMs = 0L
     private var lastProgressFrame: IntArray? = null
     private val _debugState = MutableStateFlow(GlyphDebugState())
     val debugState: StateFlow<GlyphDebugState> = _debugState.asStateFlow()
@@ -55,7 +56,12 @@ class GlyphController @Inject constructor(
                 }
             }
             if (remainingMs > 0L && progressTotalMs > 0L) {
-                handler.postDelayed(this, PROGRESS_FRAME_INTERVAL_MS)
+                nextProgressFrameElapsedMs += PROGRESS_FRAME_INTERVAL_MS
+                val now = SystemClock.uptimeMillis()
+                if (nextProgressFrameElapsedMs <= now) {
+                    nextProgressFrameElapsedMs = now + PROGRESS_FRAME_INTERVAL_MS
+                }
+                handler.postAtTime(this, nextProgressFrameElapsedMs)
             }
         }
     }
@@ -193,16 +199,38 @@ class GlyphController @Inject constructor(
     }
 
     private fun showFocus(glyphManager: GlyphManager, effect: GlyphEffect.FocusProgress) {
-        stopProgressAnimation()
         if (!effect.animate) {
+            stopProgressAnimation()
             displayFocusFrame(glyphManager, effect.remainingMs, effect.totalMs)
             return
         }
 
-        progressAnchorRemainingMs = effect.remainingMs.coerceIn(0L, effect.totalMs)
-        progressAnchorElapsedMs = SystemClock.elapsedRealtime()
-        progressTotalMs = effect.totalMs.coerceAtLeast(0L)
-        progressFrameRunnable.run()
+        val totalMs = effect.totalMs.coerceAtLeast(0L)
+        if (totalMs <= 0L) {
+            stopProgressAnimation()
+            return
+        }
+
+        val now = SystemClock.elapsedRealtime()
+        val requestedRemainingMs = effect.remainingMs.coerceIn(0L, totalMs)
+        val animationRunning = progressTotalMs == totalMs
+        progressAnchorRemainingMs = if (animationRunning) {
+            minOf(requestedRemainingMs, interpolatedRemainingMs(now))
+        } else {
+            requestedRemainingMs
+        }
+        progressAnchorElapsedMs = now
+        progressTotalMs = totalMs
+
+        if (!animationRunning) {
+            nextProgressFrameElapsedMs = SystemClock.uptimeMillis()
+            progressFrameRunnable.run()
+        }
+    }
+
+    private fun interpolatedRemainingMs(nowElapsedMs: Long): Long {
+        val elapsedMs = (nowElapsedMs - progressAnchorElapsedMs).coerceAtLeast(0L)
+        return (progressAnchorRemainingMs - elapsedMs).coerceAtLeast(0L)
     }
 
     private fun displayFocusFrame(
@@ -217,7 +245,7 @@ class GlyphController @Inject constructor(
             remainingFraction = (remainingMs.toDouble() / totalMs).toFloat(),
             ledCount = ledIndices.size
         )
-        if (lastProgressFrame?.contentEquals(brightness) == true) return
+        if (!GlyphProgressBrightness.shouldUpdate(lastProgressFrame, brightness)) return
         lastProgressFrame = brightness
 
         val builder = glyphManager.getGlyphFrameBuilder()
@@ -230,6 +258,7 @@ class GlyphController @Inject constructor(
     private fun stopProgressAnimation() {
         handler.removeCallbacks(progressFrameRunnable)
         progressTotalMs = 0L
+        nextProgressFrameElapsedMs = 0L
         lastProgressFrame = null
     }
 
@@ -285,6 +314,6 @@ class GlyphController @Inject constructor(
 
     private companion object {
         const val TAG = "GlyphController"
-        const val PROGRESS_FRAME_INTERVAL_MS = 50L
+        const val PROGRESS_FRAME_INTERVAL_MS = 250L
     }
 }
