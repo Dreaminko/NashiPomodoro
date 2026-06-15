@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.nashitimer"
+    namespace = "com.dreaminko.nashipomodoro"
     compileSdkVersion("android-36.1")
 
     defaultConfig {
-        applicationId = "com.example.nashitimer"
+        applicationId = "com.dreaminko.nashipomodoro"
         minSdk = 34
         targetSdk = 36
         versionCode = 1

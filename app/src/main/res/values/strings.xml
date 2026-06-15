@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NashiTimer</string>
+    <string name="app_name">NashiPomodoro</string>
 
     <string name="nav_focus">Focus</string>
     <string name="nav_insights">Insights</string>
@@ -137,7 +137,7 @@
     <string name="settings_vibration_intensity_description">Adjust the strength of completion vibration</string>
     <string name="unit_percent">%</string>
     <string name="settings_completion_section">Session completion</string>
-    <string name="settings_completion_section_description">Choose how NashiTimer gets your attention</string>
+    <string name="settings_completion_section_description">Choose how NashiPomodoro gets your attention</string>
     <string name="settings_glyph_section">Glyph Interface</string>
     <string name="settings_glyph_section_description">Choose how lights accompany your sessions</string>
     <string name="settings_glyph_progress">Focus progress</string>
@@ -179,6 +179,6 @@
     <string name="value_yes">Yes</string>
     <string name="value_no">No</string>
 
-    <string name="notification_running">NashiTimer is running</string>
-    <string name="notification_channel_name">NashiTimer Pomodoro</string>
+    <string name="notification_running">NashiPomodoro is running</string>
+    <string name="notification_channel_name">NashiPomodoro</string>
 </resources>

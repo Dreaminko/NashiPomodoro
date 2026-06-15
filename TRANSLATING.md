@@ -1,6 +1,6 @@
-# Translating NashiTimer
+# Translating NashiPomodoro
 
-NashiTimer uses standard Android string resources. No Kotlin changes are needed to
+NashiPomodoro uses standard Android string resources. No Kotlin changes are needed to
 add a translation.
 
 ## Add a language

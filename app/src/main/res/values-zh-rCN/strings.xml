@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NashiTimer</string>
+    <string name="app_name">NashiPomodoro</string>
 
     <string name="nav_focus">专注</string>
     <string name="nav_insights">统计</string>
@@ -133,7 +133,7 @@
     <string name="settings_vibration_intensity_description">调整完成提醒的振动强弱</string>
     <string name="unit_percent">%</string>
     <string name="settings_completion_section">完成提醒</string>
-    <string name="settings_completion_section_description">选择 NashiTimer 提醒你的方式</string>
+    <string name="settings_completion_section_description">选择 NashiPomodoro 提醒你的方式</string>
     <string name="settings_glyph_section">Glyph 灯效</string>
     <string name="settings_glyph_section_description">选择灯光如何配合你的专注时段</string>
     <string name="settings_glyph_progress">专注进度</string>
@@ -175,6 +175,6 @@
     <string name="value_yes">是</string>
     <string name="value_no">否</string>
 
-    <string name="notification_running">NashiTimer 正在运行</string>
-    <string name="notification_channel_name">NashiTimer 番茄钟</string>
+    <string name="notification_running">NashiPomodoro 正在运行</string>
+    <string name="notification_channel_name">NashiPomodoro</string>
 </resources>

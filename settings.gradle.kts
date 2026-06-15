@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NashiTimer"
+rootProject.name = "NashiPomodoro"
 include(":app", ":libs")
  
