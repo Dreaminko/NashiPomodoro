@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dreaminko.nashipomodoro.domain.model.AppSettings
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
+import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 import com.dreaminko.nashipomodoro.domain.model.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -43,18 +44,26 @@ class SettingsStore @Inject constructor(
                     .coerceIn(10, 100),
                 glyphProgressEnabled = prefs[Keys.GLYPH_PROGRESS] ?: true,
                 glyphProgressChannel = prefs[Keys.GLYPH_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphProgressDirection =
+                    prefs[Keys.GLYPH_PROGRESS_DIRECTION].toGlyphProgressDirection(),
                 glyphShortBreakProgressEnabled =
                     prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS]
                         ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
                         ?: true,
                 glyphShortBreakProgressChannel =
                     prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphShortBreakProgressDirection =
+                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION]
+                        .toGlyphProgressDirection(),
                 glyphLongBreakProgressEnabled =
                     prefs[Keys.GLYPH_LONG_BREAK_PROGRESS]
                         ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
                         ?: true,
                 glyphLongBreakProgressChannel =
                     prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphLongBreakProgressDirection =
+                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION]
+                        .toGlyphProgressDirection(),
                 glyphCompletionFlashEnabled = prefs[Keys.GLYPH_COMPLETION_FLASH] ?: true,
                 debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
                 debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
@@ -75,18 +84,26 @@ class SettingsStore @Inject constructor(
                 vibrationIntensity = (prefs[Keys.VIBRATION_INTENSITY] ?: 60).coerceIn(10, 100),
                 glyphProgressEnabled = prefs[Keys.GLYPH_PROGRESS] ?: true,
                 glyphProgressChannel = prefs[Keys.GLYPH_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphProgressDirection =
+                    prefs[Keys.GLYPH_PROGRESS_DIRECTION].toGlyphProgressDirection(),
                 glyphShortBreakProgressEnabled =
                     prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS]
                         ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
                         ?: true,
                 glyphShortBreakProgressChannel =
                     prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphShortBreakProgressDirection =
+                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION]
+                        .toGlyphProgressDirection(),
                 glyphLongBreakProgressEnabled =
                     prefs[Keys.GLYPH_LONG_BREAK_PROGRESS]
                         ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
                         ?: true,
                 glyphLongBreakProgressChannel =
                     prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+                glyphLongBreakProgressDirection =
+                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION]
+                        .toGlyphProgressDirection(),
                 glyphCompletionFlashEnabled = prefs[Keys.GLYPH_COMPLETION_FLASH] ?: true,
                 debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
                 debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
@@ -101,12 +118,17 @@ class SettingsStore @Inject constructor(
             prefs[Keys.VIBRATION_INTENSITY] = next.vibrationIntensity.coerceIn(10, 100)
             prefs[Keys.GLYPH_PROGRESS] = next.glyphProgressEnabled
             prefs[Keys.GLYPH_PROGRESS_CHANNEL] = next.glyphProgressChannel.name
+            prefs[Keys.GLYPH_PROGRESS_DIRECTION] = next.glyphProgressDirection.name
             prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS] = next.glyphShortBreakProgressEnabled
             prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL] =
                 next.glyphShortBreakProgressChannel.name
+            prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION] =
+                next.glyphShortBreakProgressDirection.name
             prefs[Keys.GLYPH_LONG_BREAK_PROGRESS] = next.glyphLongBreakProgressEnabled
             prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL] =
                 next.glyphLongBreakProgressChannel.name
+            prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION] =
+                next.glyphLongBreakProgressDirection.name
             prefs[Keys.GLYPH_COMPLETION_FLASH] = next.glyphCompletionFlashEnabled
             prefs[Keys.DEBUG_MODE] = next.debugModeEnabled
             prefs[Keys.DEBUG_FOCUS_SEC] = next.debugFocusDurationSec
@@ -124,13 +146,18 @@ class SettingsStore @Inject constructor(
         val VIBRATION_INTENSITY = intPreferencesKey("vibration_intensity")
         val GLYPH_PROGRESS = booleanPreferencesKey("glyph_progress")
         val GLYPH_PROGRESS_CHANNEL = stringPreferencesKey("glyph_progress_channel")
+        val GLYPH_PROGRESS_DIRECTION = stringPreferencesKey("glyph_progress_direction")
         val GLYPH_BREAK_ANIMATION = booleanPreferencesKey("glyph_break_animation")
         val GLYPH_SHORT_BREAK_PROGRESS = booleanPreferencesKey("glyph_short_break_progress")
         val GLYPH_SHORT_BREAK_PROGRESS_CHANNEL =
             stringPreferencesKey("glyph_short_break_progress_channel")
+        val GLYPH_SHORT_BREAK_PROGRESS_DIRECTION =
+            stringPreferencesKey("glyph_short_break_progress_direction")
         val GLYPH_LONG_BREAK_PROGRESS = booleanPreferencesKey("glyph_long_break_progress")
         val GLYPH_LONG_BREAK_PROGRESS_CHANNEL =
             stringPreferencesKey("glyph_long_break_progress_channel")
+        val GLYPH_LONG_BREAK_PROGRESS_DIRECTION =
+            stringPreferencesKey("glyph_long_break_progress_direction")
         val GLYPH_COMPLETION_FLASH = booleanPreferencesKey("glyph_completion_flash")
         val DEBUG_MODE = booleanPreferencesKey("debug_mode")
         val DEBUG_FOCUS_SEC = intPreferencesKey("debug_focus_sec")
@@ -139,3 +166,7 @@ class SettingsStore @Inject constructor(
 
 private fun String?.toGlyphChannel(): GlyphChannel =
     this?.let { runCatching { GlyphChannel.valueOf(it) }.getOrNull() } ?: GlyphChannel.AUTO
+
+private fun String?.toGlyphProgressDirection(): GlyphProgressDirection =
+    this?.let { runCatching { GlyphProgressDirection.valueOf(it) }.getOrNull() }
+        ?: GlyphProgressDirection.FORWARD

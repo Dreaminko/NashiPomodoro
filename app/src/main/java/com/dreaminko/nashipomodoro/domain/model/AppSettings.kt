@@ -13,10 +13,15 @@ data class AppSettings(
     val vibrationIntensity: Int = 60,
     val glyphProgressEnabled: Boolean = true,
     val glyphProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphProgressDirection: GlyphProgressDirection = GlyphProgressDirection.FORWARD,
     val glyphShortBreakProgressEnabled: Boolean = true,
     val glyphShortBreakProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphShortBreakProgressDirection: GlyphProgressDirection =
+        GlyphProgressDirection.FORWARD,
     val glyphLongBreakProgressEnabled: Boolean = true,
     val glyphLongBreakProgressChannel: GlyphChannel = GlyphChannel.AUTO,
+    val glyphLongBreakProgressDirection: GlyphProgressDirection =
+        GlyphProgressDirection.FORWARD,
     val glyphCompletionFlashEnabled: Boolean = true,
     val debugModeEnabled: Boolean = false,
     val debugFocusDurationSec: Int = 30
@@ -56,3 +61,5 @@ data class AppSettings(
 enum class ThemeMode { LIGHT, DARK, FOLLOW_SYSTEM }
 
 enum class GlyphChannel { AUTO, A, B, C, D, E }
+
+enum class GlyphProgressDirection { FORWARD, REVERSE }

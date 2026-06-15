@@ -148,6 +148,9 @@
     <string name="settings_glyph_long_break_progress_description">Show remaining long break time on the selected light strip</string>
     <string name="settings_glyph_light_strip">Light strip</string>
     <string name="settings_glyph_light_strip_auto">Auto</string>
+    <string name="settings_glyph_flow_direction">Flow direction</string>
+    <string name="settings_glyph_flow_forward">Forward</string>
+    <string name="settings_glyph_flow_reverse">Reverse</string>
     <string name="settings_glyph_completion_flash">Completion flash</string>
     <string name="settings_glyph_completion_flash_description">Flash the Glyph Interface when a focus session ends</string>
     <string name="settings_developer_section">Developer</string>

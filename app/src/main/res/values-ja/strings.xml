@@ -144,6 +144,9 @@
     <string name="settings_glyph_long_break_progress_description">選択したライトストリップに長い休憩の残り時間を表示します</string>
     <string name="settings_glyph_light_strip">ライトストリップ</string>
     <string name="settings_glyph_light_strip_auto">自動</string>
+    <string name="settings_glyph_flow_direction">進行方向</string>
+    <string name="settings_glyph_flow_forward">順方向</string>
+    <string name="settings_glyph_flow_reverse">逆方向</string>
     <string name="settings_glyph_completion_flash">完了時の点滅</string>
     <string name="settings_glyph_completion_flash_description">集中セッション終了時に Glyph Interface を点滅させます</string>
     <string name="settings_developer_section">開発者向け</string>

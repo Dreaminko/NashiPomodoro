@@ -1,6 +1,7 @@
 package com.dreaminko.nashipomodoro.core.glyph
 
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
+import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 
 enum class GlyphProgressSource {
     FOCUS,
@@ -13,6 +14,7 @@ sealed interface GlyphEffect {
         val remainingMs: Long,
         val totalMs: Long,
         val channel: GlyphChannel = GlyphChannel.AUTO,
+        val direction: GlyphProgressDirection = GlyphProgressDirection.FORWARD,
         val source: GlyphProgressSource = GlyphProgressSource.FOCUS,
         val animate: Boolean = true
     ) : GlyphEffect {
@@ -20,6 +22,7 @@ sealed interface GlyphEffect {
             remainingMs = (remainingFraction.coerceIn(0f, 1f) * STATIC_TOTAL_MS).toLong(),
             totalMs = STATIC_TOTAL_MS,
             channel = GlyphChannel.AUTO,
+            direction = GlyphProgressDirection.FORWARD,
             source = GlyphProgressSource.FOCUS,
             animate = false
         )

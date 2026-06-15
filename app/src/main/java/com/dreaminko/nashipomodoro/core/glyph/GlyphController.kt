@@ -7,6 +7,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
+import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
 import com.nothing.ketchum.GlyphManager
@@ -40,6 +41,7 @@ class GlyphController @Inject constructor(
     private var progressAnchorElapsedMs = 0L
     private var progressTotalMs = 0L
     private var progressChannel = GlyphChannel.AUTO
+    private var progressDirection = GlyphProgressDirection.FORWARD
     private var progressSource = GlyphProgressSource.FOCUS
     private var nextProgressFrameElapsedMs = 0L
     private var lastProgressFrame: IntArray? = null
@@ -56,7 +58,8 @@ class GlyphController @Inject constructor(
                         glyphManager,
                         remainingMs,
                         progressTotalMs,
-                        progressChannel
+                        progressChannel,
+                        progressDirection
                     )
                 }.onFailure {
                     stopProgressAnimation()
@@ -213,7 +216,8 @@ class GlyphController @Inject constructor(
                 glyphManager,
                 effect.remainingMs,
                 effect.totalMs,
-                effect.channel
+                effect.channel,
+                effect.direction
             )
             return
         }
@@ -229,6 +233,7 @@ class GlyphController @Inject constructor(
         val animationRunning =
             progressTotalMs == totalMs &&
                 progressChannel == effect.channel &&
+                progressDirection == effect.direction &&
                 progressSource == effect.source
         progressAnchorRemainingMs = if (animationRunning) {
             minOf(requestedRemainingMs, interpolatedRemainingMs(now))
@@ -238,9 +243,11 @@ class GlyphController @Inject constructor(
         progressAnchorElapsedMs = now
         progressTotalMs = totalMs
         progressChannel = effect.channel
+        progressDirection = effect.direction
         progressSource = effect.source
 
         if (!animationRunning) {
+            lastProgressFrame = null
             nextProgressFrameElapsedMs = SystemClock.uptimeMillis()
             progressFrameRunnable.run()
         }
@@ -255,9 +262,13 @@ class GlyphController @Inject constructor(
         glyphManager: GlyphManager,
         remainingMs: Long,
         totalMs: Long,
-        channel: GlyphChannel
+        channel: GlyphChannel,
+        direction: GlyphProgressDirection
     ) {
-        val ledIndices = adapter.profile.progressLedIndices(channel)
+        val ledIndices = orderedGlyphLedIndices(
+            adapter.profile.progressLedIndices(channel),
+            direction
+        )
         if (ledIndices.isEmpty() || totalMs <= 0L) return
 
         val brightness = GlyphProgressBrightness.calculate(
@@ -278,6 +289,7 @@ class GlyphController @Inject constructor(
         handler.removeCallbacks(progressFrameRunnable)
         progressTotalMs = 0L
         progressChannel = GlyphChannel.AUTO
+        progressDirection = GlyphProgressDirection.FORWARD
         progressSource = GlyphProgressSource.FOCUS
         nextProgressFrameElapsedMs = 0L
         lastProgressFrame = null
@@ -316,7 +328,7 @@ class GlyphController @Inject constructor(
     private fun effectKey(effect: GlyphEffect): String = when (effect) {
         is GlyphEffect.FocusProgress -> {
             "progress:${effect.source}:${effect.remainingMs}:${effect.totalMs}:" +
-                "${effect.channel}:${effect.animate}"
+                "${effect.channel}:${effect.direction}:${effect.animate}"
         }
         GlyphEffect.ShortBreak -> "short-break"
         GlyphEffect.LongBreak -> "long-break"

@@ -60,6 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dreaminko.nashipomodoro.R
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
+import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 import com.dreaminko.nashipomodoro.domain.model.ThemeMode
 import com.dreaminko.nashipomodoro.ui.components.NashiSwitch
 import com.dreaminko.nashipomodoro.ui.components.PageTitle
@@ -250,9 +251,11 @@ fun ReminderSettingsScreen(
                     description = stringResource(R.string.settings_glyph_progress_description),
                     enabled = settings.glyphProgressEnabled,
                     selectedChannel = settings.glyphProgressChannel,
+                    selectedDirection = settings.glyphProgressDirection,
                     availableChannels = availableGlyphChannels,
                     onEnabledChange = viewModel::setGlyphProgress,
-                    onChannelChange = viewModel::setGlyphProgressChannel
+                    onChannelChange = viewModel::setGlyphProgressChannel,
+                    onDirectionChange = viewModel::setGlyphProgressDirection
                 )
                 SettingDivider()
                 GlyphProgressSetting(
@@ -262,9 +265,11 @@ fun ReminderSettingsScreen(
                     ),
                     enabled = settings.glyphShortBreakProgressEnabled,
                     selectedChannel = settings.glyphShortBreakProgressChannel,
+                    selectedDirection = settings.glyphShortBreakProgressDirection,
                     availableChannels = availableGlyphChannels,
                     onEnabledChange = viewModel::setGlyphShortBreakProgress,
-                    onChannelChange = viewModel::setGlyphShortBreakProgressChannel
+                    onChannelChange = viewModel::setGlyphShortBreakProgressChannel,
+                    onDirectionChange = viewModel::setGlyphShortBreakProgressDirection
                 )
                 SettingDivider()
                 GlyphProgressSetting(
@@ -274,9 +279,11 @@ fun ReminderSettingsScreen(
                     ),
                     enabled = settings.glyphLongBreakProgressEnabled,
                     selectedChannel = settings.glyphLongBreakProgressChannel,
+                    selectedDirection = settings.glyphLongBreakProgressDirection,
                     availableChannels = availableGlyphChannels,
                     onEnabledChange = viewModel::setGlyphLongBreakProgress,
-                    onChannelChange = viewModel::setGlyphLongBreakProgressChannel
+                    onChannelChange = viewModel::setGlyphLongBreakProgressChannel,
+                    onDirectionChange = viewModel::setGlyphLongBreakProgressDirection
                 )
                 SettingDivider()
                 ToggleSetting(
@@ -702,9 +709,11 @@ private fun GlyphProgressSetting(
     description: String,
     enabled: Boolean,
     selectedChannel: GlyphChannel,
+    selectedDirection: GlyphProgressDirection,
     availableChannels: List<GlyphChannel>,
     onEnabledChange: (Boolean) -> Unit,
-    onChannelChange: (GlyphChannel) -> Unit
+    onChannelChange: (GlyphChannel) -> Unit,
+    onDirectionChange: (GlyphProgressDirection) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ToggleSetting(
@@ -742,6 +751,34 @@ private fun GlyphProgressSetting(
                     )
                 }
             }
+            Text(
+                text = stringResource(R.string.settings_glyph_flow_direction),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                GlyphProgressDirection.entries.forEach { direction ->
+                    FilterChip(
+                        selected = selectedDirection == direction,
+                        onClick = { onDirectionChange(direction) },
+                        label = { Text(direction.displayName()) },
+                        leadingIcon = if (selectedDirection == direction) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            }
+                        } else {
+                            null
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -753,6 +790,14 @@ private fun GlyphChannel.displayName(): String =
     } else {
         name
     }
+
+@Composable
+private fun GlyphProgressDirection.displayName(): String = stringResource(
+    when (this) {
+        GlyphProgressDirection.FORWARD -> R.string.settings_glyph_flow_forward
+        GlyphProgressDirection.REVERSE -> R.string.settings_glyph_flow_reverse
+    }
+)
 
 @Composable
 private fun ThemeMode.displayName(): String = stringResource(

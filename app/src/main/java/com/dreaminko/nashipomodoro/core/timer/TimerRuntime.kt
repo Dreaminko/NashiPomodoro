@@ -203,6 +203,7 @@ class TimerRuntime @Inject constructor(
                             remainingMs = state.remainingMs,
                             totalMs = state.totalMs,
                             channel = appSettings.glyphProgressChannel,
+                            direction = appSettings.glyphProgressDirection,
                             source = GlyphProgressSource.FOCUS
                         )
                     state.isRunning &&
@@ -212,6 +213,7 @@ class TimerRuntime @Inject constructor(
                             remainingMs = state.remainingMs,
                             totalMs = state.totalMs,
                             channel = appSettings.glyphShortBreakProgressChannel,
+                            direction = appSettings.glyphShortBreakProgressDirection,
                             source = GlyphProgressSource.SHORT_BREAK
                         )
                     state.isRunning &&
@@ -221,6 +223,7 @@ class TimerRuntime @Inject constructor(
                             remainingMs = state.remainingMs,
                             totalMs = state.totalMs,
                             channel = appSettings.glyphLongBreakProgressChannel,
+                            direction = appSettings.glyphLongBreakProgressDirection,
                             source = GlyphProgressSource.LONG_BREAK
                         )
                     else -> GlyphEffect.Off

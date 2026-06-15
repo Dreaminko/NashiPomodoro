@@ -7,6 +7,7 @@ import com.dreaminko.nashipomodoro.core.haptics.VibrationController
 import com.dreaminko.nashipomodoro.data.repository.SettingsRepository
 import com.dreaminko.nashipomodoro.domain.model.AppSettings
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
+import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 import com.dreaminko.nashipomodoro.domain.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,14 +43,20 @@ class SettingsViewModel @Inject constructor(
     fun setGlyphProgress(value: Boolean) = update { copy(glyphProgressEnabled = value) }
     fun setGlyphProgressChannel(value: GlyphChannel) =
         update { copy(glyphProgressChannel = value) }
+    fun setGlyphProgressDirection(value: GlyphProgressDirection) =
+        update { copy(glyphProgressDirection = value) }
     fun setGlyphShortBreakProgress(value: Boolean) =
         update { copy(glyphShortBreakProgressEnabled = value) }
     fun setGlyphShortBreakProgressChannel(value: GlyphChannel) =
         update { copy(glyphShortBreakProgressChannel = value) }
+    fun setGlyphShortBreakProgressDirection(value: GlyphProgressDirection) =
+        update { copy(glyphShortBreakProgressDirection = value) }
     fun setGlyphLongBreakProgress(value: Boolean) =
         update { copy(glyphLongBreakProgressEnabled = value) }
     fun setGlyphLongBreakProgressChannel(value: GlyphChannel) =
         update { copy(glyphLongBreakProgressChannel = value) }
+    fun setGlyphLongBreakProgressDirection(value: GlyphProgressDirection) =
+        update { copy(glyphLongBreakProgressDirection = value) }
     fun setGlyphCompletionFlash(value: Boolean) =
         update { copy(glyphCompletionFlashEnabled = value) }
 
