@@ -180,4 +180,17 @@
 
     <string name="notification_running">NashiPomodoro が実行中です</string>
     <string name="notification_channel_name">NashiPomodoro</string>
+    <string name="settings_check_update">アップデートを確認</string>
+    <string name="settings_check_update_description">現在のバージョン：%1$s</string>
+    <string name="update_checking_title">アップデートを確認中</string>
+    <string name="update_checking_description">GitHub Releases に接続しています…</string>
+    <string name="update_up_to_date_title">最新バージョンです</string>
+    <string name="update_up_to_date_description">バージョン %1$s が最新です。</string>
+    <string name="update_available_title">バージョン %1$s を利用できます</string>
+    <string name="update_no_release_notes">リリースノートはありません。</string>
+    <string name="update_download">ダウンロードしてインストール</string>
+    <string name="update_download_started_title">ダウンロードを開始しました</string>
+    <string name="update_download_started_description">ダウンロード完了後、システムのインストーラーが開きます。</string>
+    <string name="update_error_title">アップデートを確認できません</string>
+    <string name="update_error_description">ネットワーク接続を確認し、最新の GitHub Release に APK が含まれていることを確認してください。</string>
 </resources>

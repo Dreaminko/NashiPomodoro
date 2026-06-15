@@ -89,7 +89,7 @@ jobs:
             | base64 --decode \
             > "${RUNNER_TEMP}/nashipomodoro-release.keystore"
 
-      - name: Build signed APK and AAB
+      - name: Build signed APK
         env:
           RELEASE_VERSION_NAME: ${{ steps.version.outputs.name }}
           RELEASE_VERSION_CODE: ${{ github.run_number }}
@@ -102,7 +102,6 @@ jobs:
           ./gradlew \
             :app:testDebugUnitTest \
             :app:assembleRelease \
-            :app:bundleRelease \
             --no-daemon
 
       - name: Prepare release files
@@ -114,8 +113,6 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk \
             "dist/NashiPomodoro-${RELEASE_TAG}.apk"
-          cp app/build/outputs/bundle/release/app-release.aab \
-            "dist/NashiPomodoro-${RELEASE_TAG}.aab"
 
       - name: Publish GitHub Release
         shell: bash

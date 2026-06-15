@@ -155,6 +155,19 @@
     <string name="settings_glyph_completion_flash_description">Flash the Glyph Interface when a focus session ends</string>
     <string name="settings_developer_section">Developer</string>
     <string name="settings_debug_description">Device diagnostics and test controls</string>
+    <string name="settings_check_update">Check for updates</string>
+    <string name="settings_check_update_description">Current version: %1$s</string>
+    <string name="update_checking_title">Checking for updates</string>
+    <string name="update_checking_description">Contacting GitHub Releases…</string>
+    <string name="update_up_to_date_title">You’re up to date</string>
+    <string name="update_up_to_date_description">Version %1$s is the latest version.</string>
+    <string name="update_available_title">Version %1$s is available</string>
+    <string name="update_no_release_notes">No release notes were provided.</string>
+    <string name="update_download">Download and install</string>
+    <string name="update_download_started_title">Download started</string>
+    <string name="update_download_started_description">The update is downloading. The system installer will open when it is ready.</string>
+    <string name="update_error_title">Unable to check for updates</string>
+    <string name="update_error_description">Check your network connection and try again. The latest GitHub Release must contain an APK file.</string>
 
     <string name="debug_title">Debug</string>
     <string name="debug_mode">Debug mode</string>

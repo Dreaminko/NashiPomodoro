@@ -25,7 +25,10 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -42,6 +45,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -58,7 +62,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dreaminko.nashipomodoro.BuildConfig
 import com.dreaminko.nashipomodoro.R
+import com.dreaminko.nashipomodoro.core.update.AppUpdate
 import com.dreaminko.nashipomodoro.domain.model.GlyphChannel
 import com.dreaminko.nashipomodoro.domain.model.GlyphProgressDirection
 import com.dreaminko.nashipomodoro.domain.model.ThemeMode
@@ -72,8 +78,11 @@ fun SettingsScreen(
     onOpenTimer: () -> Unit,
     onOpenReminder: () -> Unit,
     onOpenAppearance: () -> Unit,
-    onOpenDebug: () -> Unit
+    onOpenDebug: () -> Unit,
+    updateViewModel: UpdateViewModel = hiltViewModel()
 ) {
+    val updateUiState by updateViewModel.uiState.collectAsStateWithLifecycle()
+
     SettingsPage(
         title = stringResource(R.string.settings_title),
         onBack = onBack
@@ -104,6 +113,18 @@ fun SettingsScreen(
         }
         item {
             CategorySetting(
+                icon = Icons.Rounded.SystemUpdate,
+                title = stringResource(R.string.settings_check_update),
+                description = stringResource(
+                    R.string.settings_check_update_description,
+                    BuildConfig.VERSION_NAME
+                ),
+                enabled = updateUiState != UpdateUiState.Checking,
+                onClick = updateViewModel::checkForUpdate
+            )
+        }
+        item {
+            CategorySetting(
                 icon = Icons.Rounded.BugReport,
                 title = stringResource(R.string.settings_developer_section),
                 description = stringResource(R.string.settings_debug_description),
@@ -111,6 +132,89 @@ fun SettingsScreen(
             )
         }
     }
+
+    UpdateResultDialog(
+        state = updateUiState,
+        onDismiss = updateViewModel::dismissResult,
+        onDownload = updateViewModel::downloadUpdate
+    )
+}
+
+@Composable
+private fun UpdateResultDialog(
+    state: UpdateUiState,
+    onDismiss: () -> Unit,
+    onDownload: (AppUpdate) -> Unit
+) {
+    when (state) {
+        UpdateUiState.Idle -> Unit
+        UpdateUiState.Checking -> AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            icon = { CircularProgressIndicator(modifier = Modifier.size(32.dp)) },
+            title = { Text(stringResource(R.string.update_checking_title)) },
+            text = { Text(stringResource(R.string.update_checking_description)) }
+        )
+        UpdateUiState.UpToDate -> UpdateMessageDialog(
+            title = stringResource(R.string.update_up_to_date_title),
+            message = stringResource(
+                R.string.update_up_to_date_description,
+                BuildConfig.VERSION_NAME
+            ),
+            onDismiss = onDismiss
+        )
+        is UpdateUiState.Available -> AlertDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = { onDownload(state.update) }) {
+                    Text(stringResource(R.string.update_download))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+            title = {
+                Text(stringResource(R.string.update_available_title, state.update.versionName))
+            },
+            text = {
+                Text(
+                    state.update.releaseNotes
+                        .ifBlank { stringResource(R.string.update_no_release_notes) }
+                        .take(MAX_RELEASE_NOTES_LENGTH)
+                )
+            }
+        )
+        UpdateUiState.DownloadStarted -> UpdateMessageDialog(
+            title = stringResource(R.string.update_download_started_title),
+            message = stringResource(R.string.update_download_started_description),
+            onDismiss = onDismiss
+        )
+        UpdateUiState.Error -> UpdateMessageDialog(
+            title = stringResource(R.string.update_error_title),
+            message = stringResource(R.string.update_error_description),
+            onDismiss = onDismiss
+        )
+    }
+}
+
+@Composable
+private fun UpdateMessageDialog(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.ok))
+            }
+        },
+        title = { Text(title) },
+        text = { Text(message) }
+    )
 }
 
 @Composable
@@ -414,12 +518,13 @@ private fun CategorySetting(
     icon: ImageVector,
     title: String,
     description: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = MaterialTheme.shapes.large
     ) {
@@ -448,6 +553,8 @@ private fun CategorySetting(
         }
     }
 }
+
+private const val MAX_RELEASE_NOTES_LENGTH = 2_000
 
 @Composable
 private fun SectionHeader(title: String, description: String) {
