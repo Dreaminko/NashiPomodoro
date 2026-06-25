@@ -39,8 +39,6 @@ sealed interface GlyphEffect {
         }
     }
 
-    data object ShortBreak : GlyphEffect
-    data object LongBreak : GlyphEffect
     data object CompleteFlash : GlyphEffect
     data object Off : GlyphEffect
 }

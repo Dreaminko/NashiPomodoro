@@ -192,19 +192,13 @@ class GlyphController @Inject constructor(
                     stopProgressAnimation()
                     glyphManager.turnOff()
                 }
+
                 GlyphEffect.CompleteFlash -> {
                     stopProgressAnimation()
                     flashAll(glyphManager)
                 }
+
                 is GlyphEffect.FocusProgress -> showFocus(glyphManager, effect)
-                GlyphEffect.ShortBreak -> {
-                    stopProgressAnimation()
-                    animateBreak(glyphManager, 4_000)
-                }
-                GlyphEffect.LongBreak -> {
-                    stopProgressAnimation()
-                    animateBreak(glyphManager, 6_000)
-                }
             }
         }.onFailure { logFailure("applying $effect", it) }
     }
@@ -232,9 +226,9 @@ class GlyphController @Inject constructor(
         val requestedRemainingMs = effect.remainingMs.coerceIn(0L, totalMs)
         val animationRunning =
             progressTotalMs == totalMs &&
-                progressChannel == effect.channel &&
-                progressDirection == effect.direction &&
-                progressSource == effect.source
+                    progressChannel == effect.channel &&
+                    progressDirection == effect.direction &&
+                    progressSource == effect.source
         progressAnchorRemainingMs = if (animationRunning) {
             minOf(requestedRemainingMs, interpolatedRemainingMs(now))
         } else {
@@ -295,14 +289,6 @@ class GlyphController @Inject constructor(
         lastProgressFrame = null
     }
 
-    private fun animateBreak(glyphManager: GlyphManager, periodMs: Int) {
-        val frame = allChannelsBuilder(glyphManager)
-            .buildPeriod(periodMs)
-            .buildInterval(250)
-            .buildCycles(1_000)
-            .build()
-        glyphManager.animate(frame)
-    }
 
     private fun flashAll(glyphManager: GlyphManager) {
         handler.removeCallbacksAndMessages(null)
@@ -328,10 +314,9 @@ class GlyphController @Inject constructor(
     private fun effectKey(effect: GlyphEffect): String = when (effect) {
         is GlyphEffect.FocusProgress -> {
             "progress:${effect.source}:${effect.remainingMs}:${effect.totalMs}:" +
-                "${effect.channel}:${effect.direction}:${effect.animate}"
+                    "${effect.channel}:${effect.direction}:${effect.animate}"
         }
-        GlyphEffect.ShortBreak -> "short-break"
-        GlyphEffect.LongBreak -> "long-break"
+
         GlyphEffect.CompleteFlash -> "complete:${System.nanoTime()}"
         GlyphEffect.Off -> "off"
     }

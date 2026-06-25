@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
@@ -27,7 +26,11 @@ val hasReleaseSigningConfig = listOf(
 
 android {
     namespace = "com.dreaminko.nashipomodoro"
-    compileSdkVersion("android-36.1")
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         applicationId = "com.dreaminko.nashipomodoro"

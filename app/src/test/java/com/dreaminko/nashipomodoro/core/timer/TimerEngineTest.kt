@@ -4,14 +4,12 @@ import com.dreaminko.nashipomodoro.domain.model.AppSettings
 import com.dreaminko.nashipomodoro.domain.model.TimerPhase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 
 class TimerEngineTest {
     private val settings = AppSettings(
@@ -22,16 +20,26 @@ class TimerEngineTest {
     )
 
     @Test
-    fun skipFocus_movesToBreakWithoutRecordingCompletion() = runBlocking {
-        val engine = TimerEngine()
+    fun skipFocus_countsAsCompletedRoundAndRecordsElapsedFocus() = runBlocking {
+        var elapsedNanos = 0L
+        val now = 1_000_000L
+        val engine = TimerEngine(
+            nanoTime = { elapsedNanos },
+            currentTimeMillis = { now }
+        )
 
         engine.start(settings)
+        elapsedNanos = 5 * 60 * 1_000_000_000L
         engine.skip(settings)
+        val completion = engine.focusCompletions.first()
 
         assertEquals(TimerPhase.SHORT_BREAK, engine.state.value.phase)
-        assertEquals(0, engine.state.value.completedFocusRounds)
+        assertEquals(1, engine.state.value.completedFocusRounds)
         assertTrue(engine.state.value.isRunning)
-        assertNull(withTimeoutOrNull(50) { engine.focusCompletions.first() })
+        assertEquals(5 * 60_000L, completion.durationMs)
+        assertEquals(now - 5 * 60_000L, completion.startTime)
+        assertEquals(now, completion.endTime)
+        assertEquals(1, completion.completedRound)
         engine.stop(settings)
     }
 
@@ -58,14 +66,14 @@ class TimerEngineTest {
         engine.skip(settings)
 
         assertEquals(TimerPhase.SHORT_BREAK, engine.state.value.phase)
-        assertEquals(0, engine.state.value.completedFocusRounds)
+        assertEquals(1, engine.state.value.completedFocusRounds)
         assertFalse(engine.state.value.isRunning)
-        assertNull(withTimeoutOrNull(50) { engine.focusCompletions.first() })
+        assertEquals(0L, engine.focusCompletions.first().durationMs)
         engine.stop(settings)
     }
 
     @Test
-    fun skipFocusAtLongBreakInterval_movesToShortBreakWithoutRecordingCompletion() = runBlocking {
+    fun skipFocusAtLongBreakInterval_countsRoundAndMovesToLongBreak() = runBlocking {
         val engine = TimerEngine()
         engine.restore(
             TimerSnapshot(
@@ -83,9 +91,9 @@ class TimerEngineTest {
 
         engine.skip(settings)
 
-        assertEquals(TimerPhase.SHORT_BREAK, engine.state.value.phase)
-        assertEquals(3, engine.state.value.completedFocusRounds)
-        assertNull(withTimeoutOrNull(50) { engine.focusCompletions.first() })
+        assertEquals(TimerPhase.LONG_BREAK, engine.state.value.phase)
+        assertEquals(4, engine.state.value.completedFocusRounds)
+        assertEquals(4, engine.focusCompletions.first().completedRound)
         engine.stop(settings)
     }
 

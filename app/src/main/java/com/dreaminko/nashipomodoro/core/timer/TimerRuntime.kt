@@ -83,7 +83,6 @@ class TimerRuntime @Inject constructor(
         restoreAndPersist(settingsRepository)
     }
 
-    fun initialize() = Unit
 
     fun toggle() {
         if (engine.state.value.isRunning) {

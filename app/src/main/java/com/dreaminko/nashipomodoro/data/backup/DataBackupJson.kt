@@ -33,9 +33,6 @@ object DataBackupJson {
             if (schemaVersion > SCHEMA_VERSION) {
                 throw DataBackupException("Backup file was created by a newer version.")
             }
-            if (schemaVersion < 1) {
-                throw DataBackupException("Backup file version is not supported.")
-            }
 
             return DataBackupPayload(
                 schemaVersion = schemaVersion,

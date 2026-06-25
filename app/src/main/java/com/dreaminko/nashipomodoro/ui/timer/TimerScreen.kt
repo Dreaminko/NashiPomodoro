@@ -38,6 +38,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -238,7 +239,7 @@ fun TimerScreen(
                     contentDescription = stringResource(
                         if (uiState.timer.isRunning) {
                             R.string.timer_pause_focus
-                    } else {
+                        } else {
                             R.string.timer_start_focus
                         }
                     ),
@@ -354,6 +355,13 @@ private fun LongPressSkipButton(
     var isPressing by remember { mutableStateOf(false) }
     val currentOnLongClick by rememberUpdatedState(onLongClick)
 
+    LaunchedEffect(enabled) {
+        if (!enabled) {
+            isPressing = false
+            progress.snapTo(0f)
+        }
+    }
+
     Box(
         modifier = Modifier
             .size(60.dp)
@@ -372,33 +380,38 @@ private fun LongPressSkipButton(
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput
                 coroutineScope {
-                    val animationScope = this
+                    val gestureScope = this
                     awaitEachGesture {
                         awaitFirstDown(requireUnconsumed = false)
                         isPressing = true
                         var completed = false
-                        val fillJob = animationScope.launch {
+                        val fillJob = gestureScope.launch {
                             progress.snapTo(0f)
                             progress.animateTo(
                                 targetValue = 1f,
                                 animationSpec = tween(
-                                    durationMillis = 900,
+                                    durationMillis = LONG_PRESS_DURATION_MS,
                                     easing = LinearEasing
                                 )
                             )
                             completed = true
                             currentOnLongClick()
                         }
-                        waitForUpOrCancellation()
-                        if (!completed) fillJob.cancel()
-                        isPressing = false
-                        animationScope.launch {
+
+                        try {
+                            waitForUpOrCancellation()
+                        } finally {
+                            if (!completed) fillJob.cancel()
+                            isPressing = false
+                        }
+
+                        gestureScope.launch {
                             if (completed) {
                                 progress.snapTo(0f)
                             } else {
                                 progress.animateTo(
                                     targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 150)
+                                    animationSpec = tween(durationMillis = PROGRESS_RESET_DURATION_MS)
                                 )
                             }
                         }
@@ -458,3 +471,6 @@ private val TimerPhase.labelRes: Int
         TimerPhase.LONG_BREAK -> R.string.timer_long_break
         TimerPhase.PAUSED -> R.string.timer_paused
     }
+
+private const val LONG_PRESS_DURATION_MS = 900
+private const val PROGRESS_RESET_DURATION_MS = 150
