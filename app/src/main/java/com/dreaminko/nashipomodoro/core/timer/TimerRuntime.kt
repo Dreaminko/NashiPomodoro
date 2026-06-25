@@ -1,23 +1,12 @@
 package com.dreaminko.nashipomodoro.core.timer
 
-import android.content.Context
-import android.content.Intent
-import androidx.core.content.ContextCompat
-import com.dreaminko.nashipomodoro.core.glyph.GlyphController
-import com.dreaminko.nashipomodoro.core.glyph.GlyphEffect
-import com.dreaminko.nashipomodoro.core.glyph.GlyphProgressSource
-import com.dreaminko.nashipomodoro.core.haptics.VibrationController
-import com.dreaminko.nashipomodoro.core.service.PomodoroService
 import com.dreaminko.nashipomodoro.data.local.TaskSelectionStore
 import com.dreaminko.nashipomodoro.data.local.TimerSessionStore
-import com.dreaminko.nashipomodoro.data.repository.HistoryRepository
 import com.dreaminko.nashipomodoro.data.repository.SettingsRepository
 import com.dreaminko.nashipomodoro.data.repository.TaskRepository
 import com.dreaminko.nashipomodoro.domain.model.AppSettings
-import com.dreaminko.nashipomodoro.domain.model.PomodoroSession
 import com.dreaminko.nashipomodoro.domain.model.TaskItem
 import com.dreaminko.nashipomodoro.domain.model.TimerPhase
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -50,15 +39,14 @@ private data class TimerPersistenceKey(
 
 @Singleton
 class TimerRuntime @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val engine: TimerEngine,
     settingsRepository: SettingsRepository,
     private val timerSessionStore: TimerSessionStore,
     private val taskSelectionStore: TaskSelectionStore,
     taskRepository: TaskRepository,
-    private val historyRepository: HistoryRepository,
-    private val glyphController: GlyphController,
-    private val vibrationController: VibrationController
+    private val foregroundService: TimerForegroundServiceController,
+    private val glyphEffects: TimerGlyphEffectController,
+    private val completionHandler: TimerCompletionHandler
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val settings = settingsRepository.settings.stateIn(
@@ -107,7 +95,7 @@ class TimerRuntime @Inject constructor(
 
     fun end() {
         engine.stop(settings.value)
-        context.stopService(Intent(context, PomodoroService::class.java))
+        foregroundService.stop()
     }
 
     fun skip() = engine.skip(settings.value)
@@ -149,93 +137,20 @@ class TimerRuntime @Inject constructor(
     private fun observeCompletions() {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             engine.focusCompletions.collect { completion ->
-                val inserted = historyRepository.add(
-                    PomodoroSession(
-                        startTime = completion.startTime,
-                        endTime = completion.endTime,
-                        phase = TimerPhase.FOCUS.name,
-                        durationMs = completion.durationMs,
-                        completed = true,
-                        taskId = completion.taskId,
-                        tag = FOCUS_TAG,
-                        createdAt = completion.endTime
-                    )
-                )
-                if (!inserted) return@collect
-                val currentSettings = settings.value
-                if (currentSettings.glyphCompletionFlashEnabled) {
-                    glyphController.show(GlyphEffect.CompleteFlash)
-                }
-                if (currentSettings.vibrationEnabled) {
-                    vibrationController.notifyTimerCompletion(
-                        currentSettings.vibrationAmplitude
-                    )
-                }
+                completionHandler.handle(completion, settings.value)
             }
         }
     }
 
     private fun observeStateEffects() {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            var wasRunning = false
-            engine.state.collect { state ->
-                if (state.isRunning) {
-                    val serviceIntent = Intent(context, PomodoroService::class.java)
-                        .putExtra(PomodoroService.EXTRA_TIME, state.timeText)
-                        .putExtra(PomodoroService.EXTRA_REMAINING_MS, state.remainingMs)
-                        .putExtra(PomodoroService.EXTRA_TOTAL_MS, state.totalMs)
-                    ContextCompat.startForegroundService(context, serviceIntent)
-                } else if (wasRunning) {
-                    context.stopService(Intent(context, PomodoroService::class.java))
-                }
-
-                wasRunning = state.isRunning
-            }
+            engine.state.collect(foregroundService::sync)
         }
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            var glyphStateActive = false
             combine(engine.state, settings) { state, appSettings ->
-                when {
-                    state.isRunning &&
-                        state.phase == TimerPhase.FOCUS &&
-                        appSettings.glyphProgressEnabled ->
-                        GlyphEffect.FocusProgress(
-                            remainingMs = state.remainingMs,
-                            totalMs = state.totalMs,
-                            channel = appSettings.glyphProgressChannel,
-                            direction = appSettings.glyphProgressDirection,
-                            source = GlyphProgressSource.FOCUS
-                        )
-                    state.isRunning &&
-                        state.phase == TimerPhase.SHORT_BREAK &&
-                        appSettings.glyphShortBreakProgressEnabled ->
-                        GlyphEffect.FocusProgress(
-                            remainingMs = state.remainingMs,
-                            totalMs = state.totalMs,
-                            channel = appSettings.glyphShortBreakProgressChannel,
-                            direction = appSettings.glyphShortBreakProgressDirection,
-                            source = GlyphProgressSource.SHORT_BREAK
-                        )
-                    state.isRunning &&
-                        state.phase == TimerPhase.LONG_BREAK &&
-                        appSettings.glyphLongBreakProgressEnabled ->
-                        GlyphEffect.FocusProgress(
-                            remainingMs = state.remainingMs,
-                            totalMs = state.totalMs,
-                            channel = appSettings.glyphLongBreakProgressChannel,
-                            direction = appSettings.glyphLongBreakProgressDirection,
-                            source = GlyphProgressSource.LONG_BREAK
-                        )
-                    else -> GlyphEffect.Off
-                }
-            }.collect { effect ->
-                if (effect != GlyphEffect.Off) {
-                    glyphController.show(effect)
-                    glyphStateActive = true
-                } else if (glyphStateActive) {
-                    glyphController.show(GlyphEffect.Off)
-                    glyphStateActive = false
-                }
+                state to appSettings
+            }.collect { (state, appSettings) ->
+                glyphEffects.syncProgress(state, appSettings)
             }
         }
     }
@@ -271,9 +186,5 @@ class TimerRuntime @Inject constructor(
                 }
             }
         }
-    }
-
-    private companion object {
-        const val FOCUS_TAG = "Focus"
     }
 }

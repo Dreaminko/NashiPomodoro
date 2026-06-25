@@ -14,7 +14,7 @@ import javax.inject.Inject
 class StatsViewModel @Inject constructor(
     repository: HistoryRepository
 ) : ViewModel() {
-    val stats: StateFlow<StatsSnapshot> = repository.allSessions()
+    val stats: StateFlow<StatsSnapshot> = repository.completedFocusSessions()
         .map(::buildStatsSnapshot)
         .stateIn(
         viewModelScope,

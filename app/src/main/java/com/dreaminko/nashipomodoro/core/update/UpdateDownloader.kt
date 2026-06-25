@@ -67,7 +67,7 @@ class UpdateDownloader @Inject constructor(
             context,
             downloadReceiver,
             IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-            ContextCompat.RECEIVER_EXPORTED
+            ContextCompat.RECEIVER_NOT_EXPORTED
         )
         receiverRegistered = true
     }

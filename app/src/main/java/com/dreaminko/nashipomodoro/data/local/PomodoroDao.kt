@@ -39,8 +39,34 @@ interface PomodoroDao {
     @Query("SELECT * FROM pomodoro_sessions ORDER BY createdAt DESC")
     fun allSessions(): Flow<List<PomodoroSession>>
 
+    @Query(
+        """
+        SELECT * FROM pomodoro_sessions
+        WHERE completed = 1 AND phase = :phase
+        ORDER BY createdAt DESC
+        """
+    )
+    fun completedSessionsByPhase(phase: String): Flow<List<PomodoroSession>>
+
+    @Query("SELECT * FROM pomodoro_sessions ORDER BY createdAt DESC")
+    suspend fun allSessionsSnapshot(): List<PomodoroSession>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertTask(task: TaskItem)
+    suspend fun upsertTask(task: TaskItem): Long
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSessions(sessions: List<PomodoroSession>): List<Long>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM pomodoro_sessions
+        WHERE taskId = :taskId AND completed = 1 AND phase = :phase
+        """
+    )
+    suspend fun completedSessionCountForTask(taskId: Long, phase: String): Int
+
+    @Query("SELECT * FROM tasks WHERE id = :taskId")
+    suspend fun taskSnapshot(taskId: Long): TaskItem?
 
     @Update
     suspend fun updateTask(task: TaskItem)
@@ -53,4 +79,7 @@ interface PomodoroDao {
 
     @Query("SELECT * FROM tasks ORDER BY isCompleted ASC, createdAt DESC")
     fun tasks(): Flow<List<TaskItem>>
+
+    @Query("SELECT * FROM tasks ORDER BY isCompleted ASC, createdAt DESC")
+    suspend fun tasksSnapshot(): List<TaskItem>
 }

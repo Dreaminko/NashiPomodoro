@@ -1,6 +1,7 @@
 package com.dreaminko.nashipomodoro.data.local
 
 import android.content.Context
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -14,6 +15,7 @@ import com.dreaminko.nashipomodoro.domain.model.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
@@ -29,85 +31,11 @@ class SettingsStore @Inject constructor(
         .catch { error ->
             if (error is IOException) emit(emptyPreferences()) else throw error
         }
-        .map { prefs ->
-            AppSettings(
-                focusDurationMin = prefs[Keys.FOCUS_MIN] ?: 25,
-                shortBreakMin = prefs[Keys.SHORT_BREAK_MIN] ?: 5,
-                longBreakMin = prefs[Keys.LONG_BREAK_MIN] ?: 15,
-                longBreakInterval = prefs[Keys.LONG_BREAK_INTERVAL] ?: 4,
-                dailyGoal = prefs[Keys.DAILY_GOAL] ?: 8,
-                themeMode = prefs[Keys.THEME]
-                    ?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
-                    ?: ThemeMode.DARK,
-                vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
-                vibrationIntensity = (prefs[Keys.VIBRATION_INTENSITY] ?: 60)
-                    .coerceIn(10, 100),
-                glyphProgressEnabled = prefs[Keys.GLYPH_PROGRESS] ?: true,
-                glyphProgressChannel = prefs[Keys.GLYPH_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphProgressDirection =
-                    prefs[Keys.GLYPH_PROGRESS_DIRECTION].toGlyphProgressDirection(),
-                glyphShortBreakProgressEnabled =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS]
-                        ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
-                        ?: true,
-                glyphShortBreakProgressChannel =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphShortBreakProgressDirection =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION]
-                        .toGlyphProgressDirection(),
-                glyphLongBreakProgressEnabled =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS]
-                        ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
-                        ?: true,
-                glyphLongBreakProgressChannel =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphLongBreakProgressDirection =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION]
-                        .toGlyphProgressDirection(),
-                glyphCompletionFlashEnabled = prefs[Keys.GLYPH_COMPLETION_FLASH] ?: true,
-                debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
-                debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
-            ).normalized()
-        }
+        .map { prefs -> prefs.toAppSettings() }
 
     suspend fun update(transform: AppSettings.() -> AppSettings) {
         context.settingsDataStore.edit { prefs ->
-            val next = AppSettings(
-                focusDurationMin = prefs[Keys.FOCUS_MIN] ?: 25,
-                shortBreakMin = prefs[Keys.SHORT_BREAK_MIN] ?: 5,
-                longBreakMin = prefs[Keys.LONG_BREAK_MIN] ?: 15,
-                longBreakInterval = prefs[Keys.LONG_BREAK_INTERVAL] ?: 4,
-                dailyGoal = prefs[Keys.DAILY_GOAL] ?: 8,
-                themeMode = prefs[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
-                    ?: ThemeMode.DARK,
-                vibrationEnabled = prefs[Keys.VIBRATION] ?: true,
-                vibrationIntensity = (prefs[Keys.VIBRATION_INTENSITY] ?: 60).coerceIn(10, 100),
-                glyphProgressEnabled = prefs[Keys.GLYPH_PROGRESS] ?: true,
-                glyphProgressChannel = prefs[Keys.GLYPH_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphProgressDirection =
-                    prefs[Keys.GLYPH_PROGRESS_DIRECTION].toGlyphProgressDirection(),
-                glyphShortBreakProgressEnabled =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS]
-                        ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
-                        ?: true,
-                glyphShortBreakProgressChannel =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphShortBreakProgressDirection =
-                    prefs[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION]
-                        .toGlyphProgressDirection(),
-                glyphLongBreakProgressEnabled =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS]
-                        ?: prefs[Keys.GLYPH_BREAK_ANIMATION]
-                        ?: true,
-                glyphLongBreakProgressChannel =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
-                glyphLongBreakProgressDirection =
-                    prefs[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION]
-                        .toGlyphProgressDirection(),
-                glyphCompletionFlashEnabled = prefs[Keys.GLYPH_COMPLETION_FLASH] ?: true,
-                debugModeEnabled = prefs[Keys.DEBUG_MODE] ?: false,
-                debugFocusDurationSec = prefs[Keys.DEBUG_FOCUS_SEC] ?: 30
-            ).transform().normalized()
+            val next = prefs.toAppSettings().transform().normalized()
             prefs[Keys.FOCUS_MIN] = next.focusDurationMin
             prefs[Keys.SHORT_BREAK_MIN] = next.shortBreakMin
             prefs[Keys.LONG_BREAK_MIN] = next.longBreakMin
@@ -132,6 +60,53 @@ class SettingsStore @Inject constructor(
             prefs[Keys.GLYPH_COMPLETION_FLASH] = next.glyphCompletionFlashEnabled
             prefs[Keys.DEBUG_MODE] = next.debugModeEnabled
             prefs[Keys.DEBUG_FOCUS_SEC] = next.debugFocusDurationSec
+        }
+    }
+
+    private fun Preferences.toAppSettings(): AppSettings = AppSettings(
+        focusDurationMin = this[Keys.FOCUS_MIN] ?: 25,
+        shortBreakMin = this[Keys.SHORT_BREAK_MIN] ?: 5,
+        longBreakMin = this[Keys.LONG_BREAK_MIN] ?: 15,
+        longBreakInterval = this[Keys.LONG_BREAK_INTERVAL] ?: 4,
+        dailyGoal = this[Keys.DAILY_GOAL] ?: 8,
+        themeMode = this[Keys.THEME]
+            ?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
+            ?: ThemeMode.DARK,
+        vibrationEnabled = this[Keys.VIBRATION] ?: true,
+        vibrationIntensity = (this[Keys.VIBRATION_INTENSITY] ?: 60).coerceIn(10, 100),
+        glyphProgressEnabled = this[Keys.GLYPH_PROGRESS] ?: true,
+        glyphProgressChannel = this[Keys.GLYPH_PROGRESS_CHANNEL].toGlyphChannel(),
+        glyphProgressDirection =
+            this[Keys.GLYPH_PROGRESS_DIRECTION].toGlyphProgressDirection(),
+        glyphShortBreakProgressEnabled =
+            this[Keys.GLYPH_SHORT_BREAK_PROGRESS]
+                ?: this[Keys.GLYPH_BREAK_ANIMATION]
+                ?: true,
+        glyphShortBreakProgressChannel =
+            this[Keys.GLYPH_SHORT_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+        glyphShortBreakProgressDirection =
+            this[Keys.GLYPH_SHORT_BREAK_PROGRESS_DIRECTION].toGlyphProgressDirection(),
+        glyphLongBreakProgressEnabled =
+            this[Keys.GLYPH_LONG_BREAK_PROGRESS]
+                ?: this[Keys.GLYPH_BREAK_ANIMATION]
+                ?: true,
+        glyphLongBreakProgressChannel =
+            this[Keys.GLYPH_LONG_BREAK_PROGRESS_CHANNEL].toGlyphChannel(),
+        glyphLongBreakProgressDirection =
+            this[Keys.GLYPH_LONG_BREAK_PROGRESS_DIRECTION].toGlyphProgressDirection(),
+        glyphCompletionFlashEnabled = this[Keys.GLYPH_COMPLETION_FLASH] ?: true,
+        debugModeEnabled = this[Keys.DEBUG_MODE] ?: false,
+        debugFocusDurationSec = this[Keys.DEBUG_FOCUS_SEC] ?: 30
+    ).normalized()
+
+    suspend fun currentSettings(): AppSettings = settings.first()
+
+    suspend fun importUserSettings(imported: AppSettings) {
+        update {
+            imported.normalized().copy(
+                debugModeEnabled = debugModeEnabled,
+                debugFocusDurationSec = debugFocusDurationSec
+            )
         }
     }
 

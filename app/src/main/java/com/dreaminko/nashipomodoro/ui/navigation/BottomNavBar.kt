@@ -36,6 +36,7 @@ enum class AppRoute(val route: String) {
     SETTINGS_TIMER("settings/timer"),
     SETTINGS_REMINDER("settings/reminder"),
     SETTINGS_APPEARANCE("settings/appearance"),
+    SETTINGS_DATA("settings/data"),
     DEBUG("debug")
 }
 
@@ -102,6 +103,7 @@ private val AppRoute.labelRes: Int
         AppRoute.SETTINGS_TIMER -> R.string.settings_timer_section
         AppRoute.SETTINGS_REMINDER -> R.string.settings_reminder_section
         AppRoute.SETTINGS_APPEARANCE -> R.string.settings_appearance_section
+        AppRoute.SETTINGS_DATA -> R.string.settings_data_section
         AppRoute.DEBUG -> R.string.debug_title
     }
 
@@ -114,5 +116,6 @@ private val AppRoute.icon: ImageVector
         AppRoute.SETTINGS_TIMER,
         AppRoute.SETTINGS_REMINDER,
         AppRoute.SETTINGS_APPEARANCE,
+        AppRoute.SETTINGS_DATA,
         AppRoute.DEBUG -> Icons.Rounded.Timer
     }

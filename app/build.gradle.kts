@@ -17,6 +17,7 @@ val releaseKeystorePassword =
     providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").orNull
 val releaseKeyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").orNull
 val releaseKeyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").orNull
+val nothingKey = providers.environmentVariable("NOTHING_KEY").orElse("test").get()
 val hasReleaseSigningConfig = listOf(
     releaseKeystorePath,
     releaseKeystorePassword,
@@ -34,6 +35,7 @@ android {
         targetSdk = 36
         versionCode = releaseVersionCode ?: 1
         versionName = releaseVersionName ?: "1.0"
+        manifestPlaceholders["nothingKey"] = nothingKey
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

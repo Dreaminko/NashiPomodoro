@@ -8,8 +8,4 @@
 <full-backup-content>
     <exclude domain="sharedpref" path="active_timer_session.xml" />
     <exclude domain="sharedpref" path="selected_focus_task.xml" />
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
 </full-backup-content>

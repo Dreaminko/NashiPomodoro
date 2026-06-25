@@ -102,6 +102,8 @@
     <string name="settings_reminder_section">リマインダー</string>
     <string name="settings_reminder_category_description">集中セッション完了時の通知方法</string>
     <string name="settings_appearance_category_description">テーマと表示言語</string>
+    <string name="settings_data_section">バックアップと復元</string>
+    <string name="settings_data_category_description">タスク、履歴、設定をエクスポートまたは統合</string>
     <string name="settings_focus_section">集中セッション</string>
     <string name="settings_focus_section_description">無理なく続けられるペースを選びましょう</string>
     <string name="settings_focus">集中</string>
@@ -151,6 +153,20 @@
     <string name="settings_glyph_completion_flash_description">集中セッション終了時に Glyph Interface を点滅させます</string>
     <string name="settings_developer_section">開発者向け</string>
     <string name="settings_debug_description">デバイス診断とテスト操作</string>
+
+    <string name="backup_restore_title">データバックアップ</string>
+    <string name="backup_restore_description">JSON バックアップをエクスポートするか、この端末にバックアップを統合します。デバッグ設定は含まれません。</string>
+    <string name="backup_export">バックアップを書き出す</string>
+    <string name="backup_import">バックアップを読み込む</string>
+    <string name="backup_import_confirm_title">バックアップを読み込みますか？</string>
+    <string name="backup_import_confirm_description">選択したファイルのタスクと集中履歴を現在のデータに統合します。既存のデータは削除されません。</string>
+    <string name="backup_timer_running_title">現在のラウンドを一時停止してください</string>
+    <string name="backup_timer_running_description">タイマー実行中はバックアップと復元を利用できません。このラウンドを一時停止または終了してから再試行してください。</string>
+    <string name="backup_export_success_title">バックアップを書き出しました</string>
+    <string name="backup_export_success_description">バックアップファイルを保存しました。</string>
+    <string name="backup_import_success_title">バックアップを読み込みました</string>
+    <string name="backup_import_success_description">追加したタスク: %1$d。更新したタスク: %2$d。追加した記録: %3$d。スキップした記録: %4$d。</string>
+    <string name="backup_error_title">バックアップに失敗しました</string>
 
     <string name="debug_title">デバッグ</string>
     <string name="debug_mode">デバッグモード</string>

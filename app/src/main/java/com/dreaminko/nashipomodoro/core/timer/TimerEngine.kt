@@ -135,19 +135,27 @@ class TimerEngine internal constructor(
             } else {
                 current.phase
             }
-            val nextPhase = when (currentPhase) {
-                TimerPhase.FOCUS -> TimerPhase.SHORT_BREAK
-                TimerPhase.SHORT_BREAK, TimerPhase.LONG_BREAK -> TimerPhase.FOCUS
-                TimerPhase.IDLE, TimerPhase.PAUSED -> TimerPhase.FOCUS
+            if (currentPhase == TimerPhase.FOCUS) {
+                val nextPhase = TimerPhase.SHORT_BREAK
+                val duration = durationFor(nextPhase, currentSettings)
+                _state.value = current.copy(
+                    phase = nextPhase,
+                    remainingMs = duration,
+                    totalMs = duration,
+                    isRunning = current.isRunning,
+                    taskId = null
+                )
+            } else {
+                val nextPhase = TimerPhase.FOCUS
+                val duration = durationFor(nextPhase, currentSettings)
+                _state.value = current.copy(
+                    phase = nextPhase,
+                    remainingMs = duration,
+                    totalMs = duration,
+                    isRunning = current.isRunning,
+                    taskId = selectedTaskId
+                )
             }
-            val duration = durationFor(nextPhase, currentSettings)
-            _state.value = current.copy(
-                phase = nextPhase,
-                remainingMs = duration,
-                totalMs = duration,
-                isRunning = current.isRunning,
-                taskId = if (nextPhase == TimerPhase.FOCUS) selectedTaskId else null
-            )
             if (current.isRunning) runTickerLocked()
         }
     }
@@ -298,7 +306,11 @@ class TimerEngine internal constructor(
         return (remainingNanos + NANOS_PER_MILLISECOND - 1) / NANOS_PER_MILLISECOND
     }
 
-    private fun advanceLocked(completionEndTime: Long = currentTimeMillis()) {
+    private fun advanceLocked(
+        completionEndTime: Long = currentTimeMillis(),
+        isRunning: Boolean = true,
+        emitCompletion: Boolean = true
+    ) {
         val current = _state.value
         val finishedFocus = current.phase == TimerPhase.FOCUS
         val rounds = if (finishedFocus) current.completedFocusRounds + 1 else current.completedFocusRounds
@@ -314,10 +326,10 @@ class TimerEngine internal constructor(
             remainingMs = duration,
             totalMs = duration,
             completedFocusRounds = rounds,
-            isRunning = true,
+            isRunning = isRunning,
             taskId = if (nextPhase == TimerPhase.FOCUS) selectedTaskId else null
         )
-        if (finishedFocus) {
+        if (finishedFocus && emitCompletion) {
             focusCompletionChannel.trySend(
                 FocusCompletion(
                     startTime = completionEndTime - current.totalMs,

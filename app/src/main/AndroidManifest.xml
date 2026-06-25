@@ -24,7 +24,7 @@
         android:theme="@style/Theme.NashiPomodoro">
         <meta-data
             android:name="NothingKey"
-            android:value="test" />
+            android:value="${nothingKey}" />
 
         <activity
             android:name=".MainActivity"

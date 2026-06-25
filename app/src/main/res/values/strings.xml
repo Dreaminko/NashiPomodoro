@@ -106,6 +106,8 @@
     <string name="settings_reminder_section">Reminders</string>
     <string name="settings_reminder_category_description">Feedback when a focus session is complete</string>
     <string name="settings_appearance_category_description">Theme and display language</string>
+    <string name="settings_data_section">Backup and restore</string>
+    <string name="settings_data_category_description">Export or merge your tasks, history, and settings</string>
     <string name="settings_focus_section">Focus session</string>
     <string name="settings_focus_section_description">Choose a pace you can sustain</string>
     <string name="settings_focus">Focus</string>
@@ -168,6 +170,20 @@
     <string name="update_download_started_description">The update is downloading. The system installer will open when it is ready.</string>
     <string name="update_error_title">Unable to check for updates</string>
     <string name="update_error_description">Check your network connection and try again. The latest GitHub Release must contain an APK file.</string>
+
+    <string name="backup_restore_title">Data backup</string>
+    <string name="backup_restore_description">Export a JSON backup or merge a backup file into this device. Debug settings are not included.</string>
+    <string name="backup_export">Export backup</string>
+    <string name="backup_import">Import backup</string>
+    <string name="backup_import_confirm_title">Import backup?</string>
+    <string name="backup_import_confirm_description">Tasks and focus history from the selected file will be merged with your current data. Existing data will not be cleared.</string>
+    <string name="backup_timer_running_title">Pause the current round first</string>
+    <string name="backup_timer_running_description">Backup and restore are unavailable while a timer is running. Pause or end this round, then try again.</string>
+    <string name="backup_export_success_title">Backup exported</string>
+    <string name="backup_export_success_description">Your backup file was saved.</string>
+    <string name="backup_import_success_title">Backup imported</string>
+    <string name="backup_import_success_description">Tasks added: %1$d. Tasks updated: %2$d. Sessions added: %3$d. Sessions skipped: %4$d.</string>
+    <string name="backup_error_title">Backup failed</string>
 
     <string name="debug_title">Debug</string>
     <string name="debug_mode">Debug mode</string>

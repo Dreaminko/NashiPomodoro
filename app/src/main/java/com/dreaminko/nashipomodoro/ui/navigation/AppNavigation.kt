@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dreaminko.nashipomodoro.ui.settings.AppearanceSettingsScreen
+import com.dreaminko.nashipomodoro.ui.settings.DataBackupScreen
 import com.dreaminko.nashipomodoro.ui.settings.DebugScreen
 import com.dreaminko.nashipomodoro.ui.settings.ReminderSettingsScreen
 import com.dreaminko.nashipomodoro.ui.settings.SettingsScreen
@@ -29,6 +30,7 @@ fun AppNavigation() {
         AppRoute.SETTINGS_TIMER.route,
         AppRoute.SETTINGS_REMINDER.route,
         AppRoute.SETTINGS_APPEARANCE.route,
+        AppRoute.SETTINGS_DATA.route,
         AppRoute.DEBUG.route
     )
 
@@ -67,6 +69,9 @@ fun AppNavigation() {
                     onOpenAppearance = {
                         navController.navigate(AppRoute.SETTINGS_APPEARANCE.route)
                     },
+                    onOpenDataBackup = {
+                        navController.navigate(AppRoute.SETTINGS_DATA.route)
+                    },
                     onOpenDebug = { navController.navigate(AppRoute.DEBUG.route) }
                 )
             }
@@ -78,6 +83,9 @@ fun AppNavigation() {
             }
             composable(AppRoute.SETTINGS_APPEARANCE.route) {
                 AppearanceSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(AppRoute.SETTINGS_DATA.route) {
+                DataBackupScreen(onBack = { navController.popBackStack() })
             }
             composable(AppRoute.DEBUG.route) {
                 DebugScreen(onBack = { navController.popBackStack() })
