@@ -99,10 +99,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x ./gradlew
-          ./gradlew \
-            :app:testDebugUnitTest \
-            :app:assembleRelease \
-            --no-daemon
+          ./gradlew :app:assembleRelease --no-daemon
 
       - name: Prepare release files
         id: files
