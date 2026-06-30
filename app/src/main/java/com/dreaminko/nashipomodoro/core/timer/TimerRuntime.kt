@@ -1,5 +1,6 @@
 package com.dreaminko.nashipomodoro.core.timer
 
+import android.util.Log
 import com.dreaminko.nashipomodoro.data.local.TaskSelectionStore
 import com.dreaminko.nashipomodoro.data.local.TimerSessionStore
 import com.dreaminko.nashipomodoro.data.repository.SettingsRepository
@@ -136,7 +137,11 @@ class TimerRuntime @Inject constructor(
     private fun observeCompletions() {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             engine.focusCompletions.collect { completion ->
-                completionHandler.handle(completion, settings.value)
+                runCatching {
+                    completionHandler.handle(completion, settings.value)
+                }.onFailure { error ->
+                    Log.e(TAG, "Failed to persist timer completion.", error)
+                }
             }
         }
     }
@@ -185,5 +190,9 @@ class TimerRuntime @Inject constructor(
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "TimerRuntime"
     }
 }

@@ -19,6 +19,7 @@ import javax.inject.Inject
 class PomodoroService : Service() {
     @Inject
     lateinit var timerRuntime: TimerRuntime
+    private var isForeground = false
 
     override fun onCreate() {
         super.onCreate()
@@ -32,18 +33,27 @@ class PomodoroService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(
-            NOTIFICATION_ID,
-            notification(
-                time = intent?.getStringExtra(EXTRA_TIME) ?: "--:--",
-                remainingMs = intent?.getLongExtra(EXTRA_REMAINING_MS, 0L) ?: 0L,
-                totalMs = intent?.getLongExtra(EXTRA_TOTAL_MS, 0L) ?: 0L
-            )
+        val updatedNotification = notification(
+            time = intent?.getStringExtra(EXTRA_TIME) ?: "--:--",
+            remainingMs = intent?.getLongExtra(EXTRA_REMAINING_MS, 0L) ?: 0L,
+            totalMs = intent?.getLongExtra(EXTRA_TOTAL_MS, 0L) ?: 0L
         )
+        if (isForeground) {
+            getSystemService(NotificationManager::class.java)
+                .notify(NOTIFICATION_ID, updatedNotification)
+        } else {
+            startForeground(NOTIFICATION_ID, updatedNotification)
+            isForeground = true
+        }
         return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        isForeground = false
+        super.onDestroy()
+    }
 
     private fun notification(
         time: String,
@@ -103,6 +113,7 @@ class PomodoroService : Service() {
         private const val NOTIFICATION_ID = 42
         private const val PROGRESS_MAX = 1000
         const val ACTION_STOP = "com.dreaminko.nashipomodoro.STOP"
+        const val ACTION_SYNC = "com.dreaminko.nashipomodoro.SYNC"
         const val EXTRA_TIME = "extra_time"
         const val EXTRA_REMAINING_MS = "extra_remaining_ms"
         const val EXTRA_TOTAL_MS = "extra_total_ms"

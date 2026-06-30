@@ -25,10 +25,15 @@ class TimerForegroundServiceController @Inject constructor(
     fun sync(state: TimerState) {
         if (state.isRunning) {
             val serviceIntent = Intent(context, PomodoroService::class.java)
+                .setAction(PomodoroService.ACTION_SYNC)
                 .putExtra(PomodoroService.EXTRA_TIME, state.timeText)
                 .putExtra(PomodoroService.EXTRA_REMAINING_MS, state.remainingMs)
                 .putExtra(PomodoroService.EXTRA_TOTAL_MS, state.totalMs)
-            ContextCompat.startForegroundService(context, serviceIntent)
+            if (wasRunning) {
+                context.startService(serviceIntent)
+            } else {
+                ContextCompat.startForegroundService(context, serviceIntent)
+            }
         } else if (wasRunning) {
             stop()
         }

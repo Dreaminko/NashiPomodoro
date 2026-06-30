@@ -52,7 +52,34 @@ class DataBackupRepository @Inject constructor(
     }
 
     suspend fun importPayload(payload: DataBackupPayload): DataImportSummary {
-        val mergeResult = database.withTransaction {
+        val previousSettings = settingsStore.currentSettings()
+        runCatching { settingsStore.importUserSettings(payload.settings) }
+            .getOrElse { error ->
+                throw DataBackupException("Unable to restore settings from backup.", error)
+            }
+        return try {
+            mergePayloadIntoDatabase(payload)
+        } catch (error: Exception) {
+            val rollbackError = runCatching {
+                settingsStore.importUserSettings(previousSettings)
+            }.exceptionOrNull()
+            if (rollbackError != null) {
+                rollbackError.addSuppressed(error)
+                throw DataBackupException(
+                    "Backup import failed after applying settings, and the previous settings could not be restored.",
+                    rollbackError
+                )
+            }
+            throw DataBackupException(
+                "Backup import failed. Settings were restored to their previous values.",
+                error
+            )
+        }
+    }
+
+    private suspend fun mergePayloadIntoDatabase(
+        payload: DataBackupPayload
+    ): DataImportSummary = database.withTransaction {
             val taskIdMap = mutableMapOf<Long, Long>()
             var tasksAdded = 0
             var tasksUpdated = 0
@@ -122,15 +149,6 @@ class DataBackupRepository @Inject constructor(
                 sessionsSkipped = insertedIds.size - sessionsAdded
             )
         }
-        runCatching { settingsStore.importUserSettings(payload.settings) }
-            .getOrElse { error ->
-                throw DataBackupException(
-                    "Data was imported, but settings could not be restored.",
-                    error
-                )
-            }
-        return mergeResult
-    }
 
     private fun readBackupText(uri: Uri): String {
         val resolver = context.contentResolver
